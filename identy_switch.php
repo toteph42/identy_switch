@@ -378,7 +378,8 @@ class identy_switch extends identy_switch_prefs
             return $args;
 
         $iid = self::get(null, 'iid');
-        self::set($iid, 'unseen', self::get($iid, 'unseen') + 1);
+        self::set($iid, 'unseen', self::get($iid, 'unseen') + count(explode(':', $args['diff']['new'])));
+        self::set($iid, 'last_time_checked', time());
         self::set($iid, 'notify', true);
 
 		self::do_notify();
@@ -413,9 +414,6 @@ class identy_switch extends identy_switch_prefs
 		// Only allow call under special conditions
 		if (!isset($args['action']) || $args['task'] != 'mail')
 			return $args;
-
-$this->write_log('ARGS: '.serialize(is_null($args) ? '##' : $args).
-			' cache '.count(isset($_SESSION[self::TABLE]) ? $_SESSION[self::TABLE] : []));
 
 		// Make a copy of our cached data
 		$cache = self::get();
@@ -511,9 +509,6 @@ $this->write_log('ARGS: '.serialize(is_null($args) ? '##' : $args).
 				}
 
 				$rec = &self::get($r[1]);
-				$this->write_log('"'.($r[2] <> $rec['unseen'] ? '+' : '-').'" unseen changed for user "'.$rec['label'].
-								 '" ('.$r[1].') - unseen old '.$rec['unseen'].' unseen new '.$r[2]);
-
 				if ($r[2] != $rec['unseen'])
 				{
 					if ($r[2] > $rec['unseen'])
