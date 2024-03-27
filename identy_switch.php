@@ -378,7 +378,11 @@ class identy_switch extends identy_switch_prefs
             return $args;
 
         $iid = self::get(null, 'iid');
-        self::set($iid, 'unseen', self::get($iid, 'unseen') + count(explode(':', $args['diff']['new'])));
+        $n   = 0;
+        foreach (explode(':', $args['diff']['new']) as $id)
+        	if (strlen($id) > 1)
+        		$n++;
+        self::set($iid, 'unseen', self::get($iid, 'unseen') + $n);
         self::set($iid, 'last_time_checked', time());
         self::set($iid, 'notify', true);
 
