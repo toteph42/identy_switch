@@ -1,0 +1,8 @@
+*			text=auto
+
+*.sql       text
+*.php       text
+*.inc       text
+*.js        text
+*.md        text
+*.php.dist  text

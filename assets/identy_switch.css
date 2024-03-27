@@ -1,0 +1,116 @@
+/*
+ * 	Identy switch RoundCube Bundle
+ *
+ *	@copyright	(c) 2024 Forian Daeumling, Germany. All right reserved
+ * 	@license 	LGPL-3.0-or-later
+ */
+
+#identy_switch_menu {
+	margin-right: 0px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+  	margin-top: 5px;
+  	font-weight: bold;
+  	padding-left: 2rem;
+  	text-align: left;
+  	width: 240px;
+	border: 1px solid #ccc !important;
+	border-radius: .4em;
+	background: #fff url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='4' height='5' viewBox='0 0 4 5'%3e%3cpath fill='%23343a40' d='M2 0L0 2h4zm0 5L0 3h4z'/%3e%3c/svg%3e") no-repeat right .75rem center/8px 10px;
+	background-position-x: 0.75rem;
+	height: 18px;
+  	padding-top: 8px;
+  	top: 10px;
+  	left: inherit;
+  	position: relative;
+ 	float: inline-start;
+}
+#identy_switch_dropdown {
+
+	position: fixed;
+  	z-index: 1;
+	padding: 0 .5rem 0 0;
+  	min-width: 181px;
+  	max-width: 240px;
+  	will-change: transform;
+  	top: 0;
+  	left: auto;
+  	margin-left: 0;
+  	margin-top: 18px;
+  	width: 237px;
+  	transform: translate3d(63px, 49px, 0px);
+    border-bottom-color: rgb(212, 219, 222);
+    box-shadow: 3px 3px 5px #f1f3f4;
+  	max-height: 150px;
+  	overflow-x: hidden;
+  	color: #212529;
+  	display: none;
+  	margin-left: -.5rem;
+  	border-color: #d4dbde;
+  	border-radius: .4rem;
+  	border-bottom: 1px solid #f7f7f7;
+  	background-color: rgba(255, 255, 255);
+	font-weight: 400;
+  	line-height: 35px;
+	
+	ul {
+		list-style: none;
+		margin: 0;
+  		padding: 0;
+	}
+	
+	li {
+		overflow: hidden;
+	  	text-overflow: ellipsis;
+	  	white-space: nowrap;
+	  	position: relative;
+	}
+	
+	a {
+		padding: 0 .5rem;
+  		white-space: nowrap;
+  		color: #2c363a;
+		background: none;
+	}
+	
+	li:hover {
+		background-color: rgb(236, 236, 236);
+	}	
+	
+	a:hover {
+		text-decoration: none;
+	}
+
+	.unseen {
+		position: absolute;
+	  	top: 0;
+	  	right: 0;
+	  	min-width: 2em;
+	  	line-height: 1.4rem;
+	  	margin: 7.7px 0px 7.7px 0px;
+	  	padding: 0 .3em;
+	  	border-radius: .4em;
+	  	background: #37beff;
+	  	color: #fff;
+	  	text-align: center;
+	  	font-weight: 700;
+	}
+
+}
+
+html.dark-mode #identy_switch_dropdown {
+
+	background-color: #343a40;
+	border-color: #4d6066;
+	box-shadow: 3px 3px 5px #374549;
+	
+	a {
+		color: #c5d1d3;
+	}
+		
+	li:hover {
+		background-color: #374549;
+	}
+}
+
+

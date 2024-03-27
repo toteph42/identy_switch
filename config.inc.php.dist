@@ -1,0 +1,53 @@
+<?php
+/*
+ * 	Identy switch RoundCube Bundle
+ *
+ *	@copyright	(c) 2024 Forian Daeumling, Germany. All right reserved
+ * 	@license 	LGPL-3.0-or-later
+ */
+
+$config['identy_switch.config'] = [
+
+	// Preconfigured settings for different mail domains.
+ 	// Appropriate set of values is searched by mapping domain of email (from identity) to array key.
+	
+	// Domain part of email address
+	'domain.tld' => [
+
+		// IMAP host name, use ssl:// or tls:// notation if needed, for no security use imap:// 
+		// (must always start with scheme).
+		// Required.
+		'imap' => 'imap://imap.domain.tld:143',
+
+		// Login name, can be 'email' (full address from identity), 'mbox' (only mailbox part).
+		// Any other value is threated as 'not specified' (default).
+		'user' => 'email',
+
+		// SMTP host name, use ssl:// or tls:// notation if needed, for no security use imap:// 
+		// (must always start with scheme).
+		// Required.
+		'smtp' => 'imap://smtp.domain.tld:143',
+
+		// Are specified settings locked in interface or not. Default is false.
+		'readonly' => true
+	],
+
+	'another.tld' => [
+		'imap' => 'tls://imap.another.tld',
+		'smtp' => 'tls://smtp.another.tld',
+		'user' => 'mbox',
+	],
+
+	// Allow logging to 'logs/identy_switch.log'. Default is false.
+	'logging' => false,
+
+	// Allow new mail checking. Default is true.
+	'check' => true,
+
+	// Specify interval for checking of new mails. Default is 5 min. (5 * 60 sec.)
+	'interval' => 300, 
+
+	// Specify no. of retries for reading data from mail server. Default is 10 times.
+	'retries' => 10, 
+];
+
