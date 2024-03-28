@@ -79,7 +79,7 @@ Please don't forget to set `Special Folders` in `Settings` -> `Preferences`. All
 
 This plugin is released under the [GNU General Public License v3.0](./LICENSE).
 
-### Donations ###
+### Donation ###
 
 If you like this software and you want support my work, feel free to send me a donation:
 

@@ -225,9 +225,5 @@ function identy_switch_sound(errmsg) {
 		return;
 	}
 	
-    (new Audio(src + '.mp3')).play()
-        .catch(function() {
-            // fallback to the wav format
-            (new Audio(src + '.wav')).play();
-        });
+    new Audio(src + '.mp3').play();
 }
