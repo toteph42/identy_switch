@@ -239,6 +239,45 @@ class identy_switch extends identy_switch_prefs
 	}
 
 	/**
+	 * 	Create selection menu
+	 */
+	protected function create_menu(): void
+	{
+		$rc = rcmail::get_instance();
+
+		// Build identity table
+		$acc = [];
+		foreach (self::get() as $iid => $rec)
+		{
+			// Identy switch enabled?
+			if (is_numeric($iid) && is_array($rec) && ($rec['flags'] & self::ENABLED))
+				$acc[rcube::Q($rec['label'])] = [ 'iid' => $iid, 'unseen' => $rec['unseen'] ];
+		}
+
+		// Sort identities
+		ksort($acc);
+
+		// Render UI if user has extra accounts
+		if (count($acc) > 1)
+		{
+			$iid = self::get(null, 'iid');
+			$div = '<div id="identy_switch_menu" '.
+				   'class="form-control" '.
+				   'onclick="identy_switch_toggle_menu()">'.
+				   rcube::Q(self::get($iid, 'label')).
+				   '<div id="identy_switch_dropdown"><ul>';
+			foreach ($acc as $name => $rec)
+				if ($rec['iid'] != $iid)
+				{
+					$div .= '<li onclick="identy_switch_run('.$rec['iid'].');"><a href="#">'.$name.
+					  	   	'<span id="identy_switch_opt_'.$rec['iid'].'" class="unseen">'.
+					  	   	($rec['unseen'] > 0 ? $rec['unseen'] : '').'</span></a></li>';
+				}
+			$rc->output->add_footer($div.'</ul></div></div>');
+		}
+	}
+
+	/**
 	 * 	Perform identity switch
 	 */
 	function identy_switch_do_switch(): void
@@ -304,7 +343,7 @@ class identy_switch extends identy_switch_prefs
 	{
 		$rc = rcmail::get_instance();
 
-		$rec = self::get(null, self::get(null, 'iid'));
+		$rec = self::get(null, (string)self::get(null, 'iid'));
 
 		$args['smtp_user'] = $rec['imap_user'];
         $args['smtp_pass'] = $rec['imap_pwd'] && ($rec['flags'] & self::SMTP_IMAP) ?

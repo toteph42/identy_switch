@@ -48,7 +48,7 @@ function identy_switch_addCbLarry($sw) {
 			$sw.prependTo('#taskbar');
 			$truName.hide();
 			// Move our selection menu a bit to the right
-			$('#identy_switch_menu').css('padding-top', '4px');
+			$('#identy_switch_menu').css('padding-top', '4px').css('padding-bottom', '4px');
 			$('#identy_switch_dropdown').css('margin-left', '-92px');
 
 			return true;
@@ -65,11 +65,14 @@ function identy_switch_addCbClassic($sw) {
 	if ($taskBar.length > 0) {
 		$taskBar.prepend($sw);
 		// Move our selection menu a bit to the right
-		$('#identy_switch_menu').css('margin-left', '100px');
+		$('#identy_switch_menu').css('margin-left', '100px')
+			.css('margin-top', '32px')
+			.css('padding-top', '4px')
+			.css('padding-bottom', '4px');
 		$('#identy_switch_dropdown')
 			.css('left', 'inherit')
 			.css('margin-left', '295px')
-			.css('margin-top', '9px');
+			.css('margin-top', '30px');
 	
 		return true;
 	}
@@ -81,9 +84,7 @@ function identy_switch_addCbClassic($sw) {
 function identy_switch_addCbElastic($sw) {
     var $taskBar = $('.header-title.username');
     
-    $sw.css('background-color', 'transparent').css('border', 'none')
-       .css('background-position-x','left 0.75rem').css('padding','0 0 0 2rem')
-       .css('font-weight', 'bold').css('box-shadow', 'none');
+    $sw.css('background-color', 'transparent').css('padding','4px 0 0 2rem');
     if ($taskBar.length > 0) {
         $taskBar.prepend($sw);
 
@@ -102,7 +103,6 @@ function identy_switch_addCbElastic($sw) {
 		// Move our selection menu a bit to the bottom
 		$('#identy_switch_menu')
 			.css('height', '30px')
-			.css('padding-top', '4px')
 			.css('width', '180px');
 		$('#identy_switch_dropdown')
 			.css('left', '9px')
