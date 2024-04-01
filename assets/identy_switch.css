@@ -17,7 +17,7 @@
 	border: 1px solid #ccc !important;
 	border-radius: .4em;
 	background: #fff url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='4' height='5' viewBox='0 0 4 5'%3e%3cpath fill='%23343a40' d='M2 0L0 2h4zm0 5L0 3h4z'/%3e%3c/svg%3e") no-repeat left .75rem center/8px 10px;
-  	top: 10px;
+   	top: 10px;
   	left: inherit;
   	position: relative;
  	float: inline-start;
@@ -61,6 +61,8 @@
 	  	text-overflow: ellipsis;
 	  	white-space: nowrap;
 	  	position: relative;
+	  	left: 0px;
+	  	width: 220px;
 	}
 	
 	a {

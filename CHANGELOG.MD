@@ -13,3 +13,10 @@
 ## Release 1.0.2
 
 - Updates to CSS files to make selection menu fancier
+
+
+## Release 1.0.3
+
+- Bug fix in compressed css file
+- Function create_menu() moved back to identy_switch.php
+- Some more changes to css file
