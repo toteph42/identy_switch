@@ -87,6 +87,7 @@ function identy_switch_addCbElastic($sw) {
     $sw.css('background-color', 'transparent').css('padding','4px 0 0 2rem');
     if ($taskBar.length > 0) {
         $taskBar.prepend($sw);
+        $taskBar.css('margin-left', '20px');
 
 		// Remove text from <span>
 	    var $node = $('.header-title.username');
@@ -114,6 +115,7 @@ function identy_switch_addCbElastic($sw) {
     return false;
 }
 
+// Change userid in composer window to select proper identity
 function identy_switch_fixIdent(iid) {
 	if (parseInt(iid) > 0)
 		$("#_from").val(iid);

@@ -22,8 +22,8 @@
   	position: relative;
  	float: inline-start;
 }
-#identy_switch_dropdown {
 
+#identy_switch_dropdown {
 	position: fixed;
   	z-index: 1;
 	padding: 0 .5rem 0 0;
@@ -49,52 +49,51 @@
   	background-color: rgba(255, 255, 255);
 	font-weight: 400;
   	line-height: 35px;
-	
-	ul {
-		list-style: none;
-		margin: 0;
-  		padding: 0;
-	}
-	
-	li {
-		overflow: hidden;
-	  	text-overflow: ellipsis;
-	  	white-space: nowrap;
-	  	position: relative;
-	  	left: 0px;
-	  	width: 220px;
-	}
-	
-	a {
-		padding: 0 .5rem;
-  		white-space: nowrap;
-  		color: #2c363a;
-		background: none;
-	}
-	
-	li:hover {
-		background-color: rgb(236, 236, 236);
-	}	
-	
-	a:hover {
-		text-decoration: none;
-	}
+}	
 
-	.unseen {
-		position: absolute;
-	  	top: 0;
-	  	right: 0;
-	  	min-width: 2em;
-	  	line-height: 1.4rem;
-	  	margin: 7.7px 0px 7.7px 0px;
-	  	padding: 0 .3em;
-	  	border-radius: .4em;
-	  	background: #37beff;
-	  	color: #fff;
-	  	text-align: center;
-	  	font-weight: 700;
-	}
+#identy_switch_dropdown ul {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+	
+#identy_switch_dropdown li {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	position: relative;
+	left: 0px;
+	width: 220px;
+}
+	
+#identy_switch_dropdown a {
+	padding: 0 .5rem;
+	white-space: nowrap;
+	color: #2c363a;
+	background: none;
+}
+	
+#identy_switch_dropdown li:hover {
+	background-color: rgb(236, 236, 236);
+}	
+	
+#identy_switch_dropdown a:hover {
+	text-decoration: none;
+}
 
+#identy_switch_dropdown .unseen {
+	position: absolute;
+  	top: 0;
+  	right: 0;
+  	min-width: 2em;
+  	line-height: 1.4rem;
+  	margin: 7.7px 0px 7.7px 0px;
+  	padding: 0 .3em;
+  	border-radius: .4em;
+  	background: #37beff;
+  	color: #fff;
+  	text-align: center;
+  	font-weight: 700;
 }
 
 html.dark-mode #identy_switch_menu {
@@ -116,18 +115,17 @@ html.dark-mode #identy_switch_menu {
 }
 
 html.dark-mode #identy_switch_dropdown {
-
 	background-color: #343a40;
 	border-color: #4d6066;
 	box-shadow: 3px 3px 5px #374549;
-	
-	a {
-		color: #c5d1d3;
-	}
+}
+
+html.dark-mode #identy_switch_dropdown a {
+	color: #c5d1d3;
+}
 		
-	li:hover {
-		background-color: #374549;
-	}
+html.dark-mode #identy_switch_dropdown li:hover {
+	background-color: #374549;
 }
 
 

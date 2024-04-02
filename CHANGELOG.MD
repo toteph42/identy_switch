@@ -12,11 +12,18 @@
 
 ## Release 1.0.2
 
-- Updates to CSS files to make selection menu fancier
-
+- Updates to CSS files 
 
 ## Release 1.0.3
 
-- Bug fix in compressed css file
+- Updates to CSS files 
+
+## Release 1.0.4
+
 - Function create_menu() moved back to identy_switch.php
-- Some more changes to css file
+
+## Release 1.0.5
+
+- Some more changes to CSS file
+- Changed CSS and JS compressor 
+- Creation of identity selection menu restricted to mail template

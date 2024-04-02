@@ -53,8 +53,6 @@ class identy_switch extends identy_switch_prefs
 		$this->include_stylesheet('assets/identy_switch.css');
 	}
 
-	// IDENT SWITCH HANDLING --------------------------------------------------------------------------------
-
 	/**
 	 * 	Startup script
 	 *
@@ -227,7 +225,8 @@ class identy_switch extends identy_switch_prefs
 					self::set($r['iid'], 'notify', false);
 				}
 			}
-			self::create_menu();
+			if ($args['template'] == 'mail')
+				self::create_menu();
 			break;
 
 		case 'settings':
