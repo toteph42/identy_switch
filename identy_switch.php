@@ -28,7 +28,7 @@ class identy_switch extends identy_switch_prefs
 		$this->add_hook('render_page', 					  [ $this, 'on_render_page' ]);
 		$this->add_hook('smtp_connect', 				  [ $this, 'on_smtp_connect' ]);
 		$this->add_hook('template_object_composeheaders', [ $this, 'on_object_composeheaders' ]);
-		$this->register_action('identy_switch_do',  		  [ $this, 'identy_switch_do_switch' ]);
+		$this->register_action('identy_switch_do',  	  [ $this, 'identy_switch_do_switch' ]);
 
 		// Preference hooks and actions
 		parent::init();
@@ -371,8 +371,6 @@ class identy_switch extends identy_switch_prefs
 		}
 	}
 
-	// LDAP HANDLING ----------------------------------------------------------------------------------------
-
 	/**
 	 * 	Override LDAP password
 	 *
@@ -403,8 +401,6 @@ class identy_switch extends identy_switch_prefs
 
 		return $args;
 	}
-
-	// CHECK EMAIL HANDLING ---------------------------------------------------------------------------------
 
 	/**
 	 * 	Catch new mail notification for default user
@@ -460,19 +456,23 @@ class identy_switch extends identy_switch_prefs
 		// Make a copy of our cached data
 		$cache = self::get();
 
-		// Mssage marked for active user?
-		if ($args['action'] == 'mark' || $args['action'] == 'move')
+		// Message action for active user?
+		if ($args['action'] == 'mark' || $args['action'] == 'move' || $args['action'] == 'delete')
 		{
 			$rec = self::get($iid = self::get(null, 'iid'));
 			$n   = count(explode(',', rcube_utils::get_input_value('_uid', rcube_utils::INPUT_POST)));
 			$typ = rcube_utils::get_input_value('_flag', rcube_utils::INPUT_POST);
-			if ($args['action'] == 'move' && rcube_utils::get_input_value('_target_mbox',
-				rcube_utils::INPUT_POST) == $rec['trash'])
+			$xfl = (bool)$rc->config->get('read_when_deleted');
+
+			if ($args['action'] == 'move' &&
+				strtolower(rcube_utils::get_input_value('_target_mbox', rcube_utils::INPUT_POST)) == 'trash' && $xfl)
+				$typ = 'read';
+			if ($args['action'] == 'delete' && $xfl)
 				$typ = 'read';
 			if ($typ == 'unread')
-				self::set($iid, 'unseen', $rec['unseen'] + $n);
+				self::set($iid, 'unseen', self::get($iid, 'unseen') + $n);
 			elseif ($typ == 'read')
-				self::set($iid, 'unseen', $rec['unseen'] - $n);
+				self::set($iid, 'unseen', self::get($iid, 'unseen') - $n);
 			if ($typ)
 				self::set($iid, 'last_time_checked', time());
 
@@ -507,7 +507,7 @@ class identy_switch extends identy_switch_prefs
 			    self::set('config', 'fp', $cfg['fp'] = new identy_switch_rpc());
 				if (is_string($cfg['fp']->open($host)))
 				{
-					$this->write_log('NewMail: '.$cfg['fp']);
+					$this->write_log('NewMail: error - '.$cfg['fp']);
 					return $args;
 				}
 			}
@@ -544,9 +544,9 @@ class identy_switch extends identy_switch_prefs
 
 				$r = explode('##', $line);
 				// Check for error message
-				if (!$r[1])
+				if (!$r[1] && isset($r[2]))
 				{
-					$this->write_log('NewMail: '.$r[2]);
+					$this->write_log('NewMail error: '.$r[2]);
 					continue;
 				}
 
