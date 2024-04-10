@@ -286,8 +286,8 @@ class identy_switch extends identy_switch_prefs
 		$rc->session->remove('folders');
 		$rc->session->remove('unseen_count');
 
-		// Force collection of unseen mails  for current account
-		self::set(self::get(null, 'iid'), 'last_time_checked', 0);
+		// Force collection of unseen mails for current account
+		self::set(self::get(null, 'iid'), 'last_time_checked', -1);
 
 		// Get new account
 		$iid = rcube_utils::get_input_value('identy_switch_iid', rcube_utils::INPUT_POST);
@@ -534,7 +534,7 @@ class identy_switch extends identy_switch_prefs
 				$rec = &self::get($r[1]);
 				if ($r[2] != $rec['unseen'])
 				{
-					if ($r[2] > $rec['unseen'])
+					if ($r[2] > $rec['unseen'] && $rec['last_time_checked'] != -1)
 						self::set($r[1], 'notify', true);
 					self::set($r[1], 'unseen', $r[2]);
 				}

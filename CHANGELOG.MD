@@ -1,5 +1,9 @@
 # Changelog Ident switch plugin
 
+## Release 1.0.9
+
+- Notification handling slightly modified
+
 ## Release 1.0.8
 
 - Some fixes to README.md
