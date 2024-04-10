@@ -1,9 +1,13 @@
 # Changelog Ident switch plugin
 
+## Release 1.0.7
+
+- Unseen count on active account moved to identy_switch_do_switch()
+
 ## Release 1.0.6
 
 - Fixing some unread counter problems
-- Bug in SQlite and postGres SQL files
+- Bug in SQlite and postgres SQL files
 
 ## Release 1.0.5
 

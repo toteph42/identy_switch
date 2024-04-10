@@ -116,9 +116,9 @@ class identy_switch extends identy_switch_prefs
 				}
 				self::set('config', 'language', $_SESSION['language']);
 				// Volatile variables
-				// ['config']['cache']
-				// ['config']['data#]
-				// ['config']['fp']
+				// ['config']['cache'] 	- All session variables used by identy switch
+				// ['config']['data']  	- Unseen excchange data file
+				// ['config']['fp']		- File pointer
 
 				// Set default user
 				self::set(null, 'iid', -1);
@@ -286,6 +286,10 @@ class identy_switch extends identy_switch_prefs
 		$rc->session->remove('folders');
 		$rc->session->remove('unseen_count');
 
+		// Force collection of unseen mails  for current account
+		self::set(self::get(null, 'iid'), 'last_time_checked', 0);
+
+		// Get new account
 		$iid = rcube_utils::get_input_value('identy_switch_iid', rcube_utils::INPUT_POST);
 		$rec = self::get($iid);
 
@@ -450,34 +454,11 @@ class identy_switch extends identy_switch_prefs
 			return $args;
 
 		// Only allow call under special conditions
-		if (!isset($args['action']) || $args['task'] != 'mail')
+		if (!isset($args['action']) || $args['action'] != 'getunread')
 			return $args;
 
 		// Make a copy of our cached data
 		$cache = self::get();
-
-		// Message action for active user?
-		if ($args['action'] == 'mark' || $args['action'] == 'move' || $args['action'] == 'delete')
-		{
-			$rec = self::get($iid = self::get(null, 'iid'));
-			$n   = count(explode(',', rcube_utils::get_input_value('_uid', rcube_utils::INPUT_POST)));
-			$typ = rcube_utils::get_input_value('_flag', rcube_utils::INPUT_POST);
-			$xfl = (bool)$rc->config->get('read_when_deleted');
-
-			if ($args['action'] == 'move' &&
-				strtolower(rcube_utils::get_input_value('_target_mbox', rcube_utils::INPUT_POST)) == 'trash' && $xfl)
-				$typ = 'read';
-			if ($args['action'] == 'delete' && $xfl)
-				$typ = 'read';
-			if ($typ == 'unread')
-				self::set($iid, 'unseen', self::get($iid, 'unseen') + $n);
-			elseif ($typ == 'read')
-				self::set($iid, 'unseen', self::get($iid, 'unseen') - $n);
-			if ($typ)
-				self::set($iid, 'last_time_checked', time());
-
-			return $args;
-		}
 
 		// Check if we're outside waiting window
 		$chk = 0;
