@@ -57,7 +57,7 @@ If you've selected an identity (or use the default identity), you may change set
 
 If you receive new mails, the number of new mails will be shown in identity selection menue.
 
-##Pre-configuration##
+### Pre-configuration ###
 
 There is a file `config.inc.php` available. This file can be used to specify some configuration settings.
 
@@ -73,7 +73,7 @@ Please don't forget to set `Special Folders` in `Settings` -> `Preferences`. All
 
 ### Version compatibility ###
 
-* Versions 5.x - for Roundcube v1.6. Requires PHP version >= 8.0.0.
+* Versions 1.x - for Roundcube v1.6. Requires PHP version >= 8.0.0.
 
 ### License ###
 

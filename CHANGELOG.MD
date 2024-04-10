@@ -1,5 +1,9 @@
 # Changelog Ident switch plugin
 
+## Release 1.0.8
+
+- Some fixes to README.md
+
 ## Release 1.0.7
 
 - Unseen count on active account moved to identy_switch_do_switch()
