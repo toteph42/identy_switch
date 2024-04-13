@@ -8,6 +8,41 @@ declare(strict_types=1);
  * 	@license 	LGPL-3.0-or-later
  */
 
+/**
+ *
+ * 	Data structure
+ *
+ * 	config 				Configuration data
+ * 		logging			Allow logging to 'logs/identy_switch.log'
+ * 		check			Allow new mail checking
+ * 		interval		Specify interval for checking of new mails
+ * 		retries			Specify no. of retries for reading data from mail server
+ * 		language		Language used
+ * 		cache	 		All session variables used by identy switch
+ * 		data	  		Unseen exchange data file
+ * 		fp				File pointer
+ * 	iid					Active identity (-1 = default user)
+ * 	[n]					Cached identity data
+ * 		label			Label
+ * 		flags			Flags
+ * 		imap_user		IMAP user
+ * 		imap_pwd		IMAP password
+ * 		imap_host		IMAP host
+ * 		imap_port		IMAP port
+ * 		smtp_host		SMTP host
+ * 		smtp_port		SMTP port
+ * 		notify_timeout	Notification timeout
+ * 		newmail_check	New mail check interval
+ * 		drafts			Draft folder name
+ * 		sent			Sent folder name
+ * 		junk			Junk folder name
+ * 		trash			Trash folder name
+ * 		unseen			# of unseen messages
+ * 		checked_last	Last time checked
+ * 		notify			Notify user flag
+ *
+ */
+
 require_once INSTALL_PATH.'plugins/identy_switch/identy_switch_prefs.php';
 require_once INSTALL_PATH.'plugins/identy_switch/identy_switch_newmails.php';
 
@@ -42,8 +77,6 @@ class identy_switch extends identy_switch_prefs
 		// New mail hooks and action
 		$this->add_hook('new_messages', 				  [ $this, 'catch_newmails' ]);
 		$this->add_hook('refresh', 			  			  [ $this, 'check_newmails' ]);
-
-		# ggf. action getunread ignorieren. nur beiaction=list
 		$this->add_hook('ready',	 					  [ $this, 'check_newmails' ]);
 
 		// LDAP hooks
@@ -115,10 +148,6 @@ class identy_switch extends identy_switch_prefs
 						self::set('config', $k, $v, 10);
 				}
 				self::set('config', 'language', $_SESSION['language']);
-				// Volatile variables
-				// ['config']['cache'] 	- All session variables used by identy switch
-				// ['config']['data']  	- Unseen excchange data file
-				// ['config']['fp']		- File pointer
 
 				// Set default user
 				self::set(null, 'iid', -1);
@@ -185,23 +214,9 @@ class identy_switch extends identy_switch_prefs
 					self::set(-1, 'flags', self::get(-1, 'flags') | (isset($prefs['lock_special_folders']) &&
 									   $prefs['lock_special_folders'] == '1' ? self::LOCK_SPECIAL_FOLDER : 0));
 
-				// Check unseen count
-		    	$storage = $rc->get_storage();
-				$folders = [ 'INBOX' ];
-				if (self::get(-1, 'flags') & self::CHECK_ALLFOLDER)
-					$folders += $storage->list_folders_subscribed('', '*'. null, null, true);
-
-			    // Skip exception folders (and their subfolders)
-			    foreach ($folders as $k => $mbox)
-					if ($k != 'INBOX' && stripos(self::get(-1, $mbox), $mbox) === 0)
-						unset($folders[$k]);
-				$unseen = 0;
-				foreach ($folders as $mbox)
-					$unseen += $storage->count($mbox, 'UNSEEN');
-
 				// Volatile variables
-				self::set(-1, 'unseen', $unseen);
-				self::set(-1, 'last_time_checked', time());
+				self::set(-1, 'unseen', 0);
+				self::set(-1, 'checked_last', 0);
 				self::set(-1, 'notify', false);
 
 				// Swap data of alternative accounts
@@ -221,7 +236,7 @@ class identy_switch extends identy_switch_prefs
 					}
 					// Volatile variables
 					self::set($r['iid'], 'unseen', 0);
-					self::set($r['iid'], 'last_time_checked', 0);
+					self::set($r['iid'], 'checked_last', 0);
 					self::set($r['iid'], 'notify', false);
 				}
 			}
@@ -286,8 +301,11 @@ class identy_switch extends identy_switch_prefs
 		$rc->session->remove('folders');
 		$rc->session->remove('unseen_count');
 
-		// Force collection of unseen mails for current account
-		self::set(self::get(null, 'iid'), 'last_time_checked', -1);
+		// Force reload of unseen counter
+		$iid = self::get(null, 'iid');
+		self::set($iid, 'flags', self::get($iid, 'flags') | self::UNSEEN);
+		self::set($iid, 'unseen', 0);
+        self::set($iid, 'checked_last', 0);
 
 		// Get new account
 		$iid = rcube_utils::get_input_value('identy_switch_iid', rcube_utils::INPUT_POST);
@@ -421,7 +439,7 @@ class identy_switch extends identy_switch_prefs
         	if (strlen($id) > 1)
         		$n++;
         self::set($iid, 'unseen', self::get($iid, 'unseen') + $n);
-        self::set($iid, 'last_time_checked', time());
+        self::set($iid, 'checked_last', time());
         self::set($iid, 'notify', true);
 
 		self::do_notify();
@@ -454,7 +472,7 @@ class identy_switch extends identy_switch_prefs
 			return $args;
 
 		// Only allow call under special conditions
-		if (!isset($args['action']) || $args['action'] != 'getunread')
+		if (!isset($args['action']) || $args['action'] != 'refresh')
 			return $args;
 
 		// Make a copy of our cached data
@@ -467,13 +485,13 @@ class identy_switch extends identy_switch_prefs
 			if (!is_integer($iid))
 				continue;
 
-			if ((int)$rec['last_time_checked'] + $cfg['interval'] < time())
+			if ((int)$rec['checked_last'] + $cfg['interval'] < time())
 				$chk++;
 			else
 				unset($cache[$iid]);
 		}
 
-		// check for data file
+		// Check for data file
 		$data_file = file_exists($cfg['data']);
 
 		if (!$chk && !$data_file)
@@ -534,11 +552,17 @@ class identy_switch extends identy_switch_prefs
 				$rec = &self::get($r[1]);
 				if ($r[2] != $rec['unseen'])
 				{
-					if ($r[2] > $rec['unseen'] && $rec['last_time_checked'] != -1)
-						self::set($r[1], 'notify', true);
+					if ($r[2] > $rec['unseen'])
+					{
+						// Allow to notify
+					 	if (!($rec['flags'] & self::UNSEEN))
+					 		self::set($r[1], 'notify', true);
+						else
+							self::set($r[1], 'flags', $rec['flags'] & ~self::UNSEEN);
+					}
 					self::set($r[1], 'unseen', $r[2]);
 				}
-				self::set($r[1], 'last_time_checked', $r[0]);
+				self::set($r[1], 'checked_last', $r[0]);
 			}
 
 			self::do_notify();

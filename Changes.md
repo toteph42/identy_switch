@@ -1,5 +1,9 @@
 # Changelog Ident switch plugin
 
+## Release 1.0.10
+
+- When switching identity unseen counter update is forced
+
 ## Release 1.0.9
 
 - Notification handling slightly modified

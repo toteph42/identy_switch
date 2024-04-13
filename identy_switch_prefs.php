@@ -25,6 +25,7 @@ class identy_switch_prefs extends rcube_plugin
 	const CHECK_ALLFOLDER		= 0x0800;
 	const SHOW_REAL_FOLDER		= 0x1000;
 	const LOCK_SPECIAL_FOLDER	= 0x2000;
+	const UNSEEN				= 0x4000;
 
 	/**
 	 * 	Initialize Plugin
