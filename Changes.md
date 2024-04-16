@@ -1,5 +1,9 @@
 # Changelog Ident switch plugin
 
+## Release 1.0.11
+
+- Some typos fixed
+
 ## Release 1.0.10
 
 - When switching identity unseen counter update is forced

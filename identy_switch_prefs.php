@@ -171,10 +171,12 @@ class identy_switch_prefs extends rcube_plugin
 
 		if ($iid != -1)
 		{
-			$sql = 'UPDATE '.$this->rc->db->table_name(self::TABLE).
+			$rc = rcmail::get_instance();
+
+			$sql = 'UPDATE '.$rc->db->table_name(self::TABLE).
 				   ' SET flags = ?, drafts = ?, sent = ?, junk = ?, trash = ?'.
 				   ' WHERE iid = ?';
-			$this->rc->db->query( $sql, $rec['flags'], $rec['drafts'], ['sent'], $rec['junk'], ['trash'], $iid);
+			$rc->db->query( $sql, $rec['flags'], $rec['drafts'], $rec['sent'], $rec['junk'], $rec['trash'], $iid);
 
 			// Abuse $plugin['abort'] to prevent RC main from saving prefs
 			$args['abort'] 	= true;
@@ -438,10 +440,12 @@ class identy_switch_prefs extends rcube_plugin
 
 		if ($iid != -1)
 		{
-			$sql = 'UPDATE '.$this->rc->db->table_name(self::TABLE).
+			$rc = rcmail::get_instance();
+
+			$sql = 'UPDATE '.$rc->db->table_name(self::TABLE).
 				   ' SET newmail_check = ? '.
 				   ' WHERE iid = ?';
-			$this->rc->db->query( $sql, $rec['newmail_check'], $iid);
+			$rc->db->query( $sql, $rec['newmail_check'], $iid);
 
 			// Abuse $plugin['abort'] to prevent RC main from saving prefs
 			$args['abort'] 	= true;
