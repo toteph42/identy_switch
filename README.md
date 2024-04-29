@@ -57,11 +57,19 @@ If you've selected an identity (or use the default identity), you may change set
 
 If you receive new mails, the number of new mails will be shown in identity selection menue.
 
-### Pre-configuration ###
+### Configuration ###
 
-There is a file `config.inc.php` available. This file can be used to specify some configuration settings.
+There is a file `config.inc.php` in the plugin directory available. This file can be used to specify some configuration settings.
 
 If you want to change sound, icon or desktop icon, please checkout `alert.mp3`, `alert.wav`, `alert.ico` and `alert.gif` in sub-directory `assets`.
+
+### Locking configuration ###
+
+You may use the `dont_override` configuration option in your `config/config.inc.php` file to lock some options from being overriden. This plugins supports the following options to be protected:
+
+* `draft_mbox`, `sent_mbox`, `junk_mbox`, `trash_mbox` - User cannot override preconfigured special folder name.
+* `check_all_folders` - User cannot override preconfigured flag to check all folders.
+* `newmail_notifier_basic`, `newmail_notifier_desktop`, `newmail_notifier_sound` - User cannot override preconfigured notification setting.
 
 ### Performance ###
 

@@ -1,5 +1,11 @@
 # Changelog Ident switch plugin
 
+## Release 1.0.12
+
+- 'dont_override' option documented
+- Bug fixed when changing standard identy name 
+- Some bugs fixed when trying to edit identy record
+
 ## Release 1.0.11
 
 - Some typos fixed

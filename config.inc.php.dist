@@ -27,9 +27,6 @@ $config['identy_switch.config'] = [
 		// (must always start with scheme).
 		// Required.
 		'smtp' => 'imap://smtp.domain.tld:143',
-
-		// Are specified settings locked in interface or not. Default is false.
-		'readonly' => true
 	],
 
 	'another.tld' => [

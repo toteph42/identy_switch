@@ -42,6 +42,7 @@ class identy_switch_prefs extends rcube_plugin
 		$this->add_hook('identity_delete', 				  [ $this, 'identy_switch_delete' ]);
 		$this->add_hook('preferences_list', 			  [ $this, 'prefs_list' ]);
 		$this->add_hook('preferences_save', 			  [ $this, 'prefs_save' ]);
+		$this->add_hook('identity_update', 			  	  [ $this, 'prefs_upd' ]);
 	}
 
 	/**
@@ -96,6 +97,20 @@ class identy_switch_prefs extends rcube_plugin
 		// Mailbox settings
 		if ($args['section'] == 'mailbox')
 			return self::save_notify_form($args);
+
+		return $args;
+	}
+
+	/**
+	 * 	Update identity pefences in settings
+	 *
+	 * 	@param array $args
+	 * 	@return array
+	 */
+	function prefs_upd(array $args): array
+	{
+		if ($args['record']['standard'])
+			self::set(-1, 'label', $args['record']['name']);
 
 		return $args;
 	}
@@ -550,34 +565,23 @@ class identy_switch_prefs extends rcube_plugin
 	private function get_common_form(array &$args): array
 	{
 
-		// Set readonly status
-		$rdo = 0;
 		$rec = null;
 
-		// Creating new identity?
+		// Edit existing identity record?
 		if (isset($args['record']['identity_id']))
-		{
 	        $rec = self::get($args['record']['identity_id']);
 
-			// Lock fields if needed
-        	$cfg = $this->get_config($args['record']['email']);
-        	if (is_array($cfg) && $cfg['readonly'])
-				$rdo = in_array(strtoupper($cfg['user']), array('EMAIL', 'MBOX')) ? 2 : 1;
-		}
+        $args['record']['label'] = $rec ? $rec['label'] : '';
 
-        $args['record']['idsw_label'] = $rec ? $rec['label'] : '';
-
-        $ise = $rec ? ($rec['flags'] & self::ENABLED ? '1' : '') : '';
-		$ena = new html_checkbox([   'name' 	=> '_idsw_enabled',
+        $ise = $rec ? ($rec['flags'] & self::ENABLED ? '1' : '0') : '0';
+		$ena = new html_checkbox([   'name' 	=> '_enabled',
 								     'onchange' => 'identy_switch_enabled();',
-								  	 'value' 	=> '1' ]);
-		$to = new html_hiddenfield([ 'name' 	=> '_idsw_readonly',
-									 'value' 	=> $rdo ]);
+								  	 'value' 	=> $ise ]);
 
 		return [
-			'idsw_enabled'	=> [ 'label' => $this->gettext('idsw.common.enabled'),
-								 'value' => $ena->show($ise).$to->show(), ],
-			'idsw_label' 	=> [ 'label' => $this->gettext('idsw.common.label'),
+			'enabled'		=> [ 'label' => $this->gettext('idsw.common.enabled'),
+								 'value' => $ena->show($ise), ],
+			'label' 		=> [ 'label' => $this->gettext('idsw.common.label'),
 								 'type' => 'text', 'maxlength' => 32 ],
 		];
 	}
@@ -784,28 +788,32 @@ class identy_switch_prefs extends rcube_plugin
 	{
 		$retVal = [];
 
-		if ($this->get_field_value('idsw_enabled'))
-			$retVal['flags'] = self::ENABLED;
-		else
+		$iid = (string)rcube_utils::get_input_value('_iid', rcube_utils::INPUT_POST);
+		if (!isset($_SESSION[self::TABLE][$iid]))
 			return $retVal;
 
-		if (!($retVal['label'] = $this->get_field_value('idsw_label')))
+		if ($this->get_field_value($iid, 'enabled'))
+			$retVal['flags'] = self::ENABLED;
+		else
+			$retVal['flags'] &= ~self::ENABLED;
+
+		if (!($retVal['label'] = $this->get_field_value($iid, 'label')))
 			$retVal['label'] = 'identy_switch';
 
-		if (!($retVal['imap_host'] = $this->get_field_value('imap_host')))
+		if (!($retVal['imap_host'] = $this->get_field_value($iid, 'imap_host')))
 			$retVal['err'] = 'imap.host.miss';
-		if (!($retVal['imap_auth'] = $this->get_field_value('imap_auth')))
+		if (!($retVal['imap_auth'] = $this->get_field_value($iid, 'imap_auth')))
 			$retVal['err'] = 'imap.auth';
-		$retVal['imap_port'] = $this->get_field_value('imap_port');
-		if (!($retVal['imap_user'] = $this->get_field_value('imap_user')))
+		$retVal['imap_port'] = $this->get_field_value($iid, 'imap_port');
+		if (!($retVal['imap_user'] = $this->get_field_value($iid, 'imap_user')))
 			$retVal['err'] = 'imap.user.miss';
-		if (!($retVal['imap_pwd'] = $this->get_field_value('imap_pwd', true, true)))
+		if (!($retVal['imap_pwd'] = $this->get_field_value($iid, 'imap_pwd', true, true)))
 			$retVal['err'] = 'imap.pwd.miss';
-		if (!($retVal['imap_delim'] = $this->get_field_value('imap_delim')))
+		if (!($retVal['imap_delim'] = $this->get_field_value($iid, 'imap_delim')))
 			$retVal['err'] = 'imap.delim.miss';
 
 		// Check for overrides
-		if (strpos($retVal['imap_host'], '://'))
+		if ($retVal['imap_host'] && strpos($retVal['imap_host'], '://'))
 		{
 			$retVal['imap_auth'] = strtolower(substr($retVal['imap_host'], 0, 3));
 			$retVal['imap_host'] = substr($retVal['imap_host'], 6);
@@ -826,17 +834,20 @@ class identy_switch_prefs extends rcube_plugin
 		elseif ($retVal['imap_auth'] == 'tls')
 			$retVal['flags'] |= self::IMAP_TLS;
 
-		if (!($retVal['smtp_host'] = $this->get_field_value('smtp_host')))
+		if (!($retVal['smtp_host'] = $this->get_field_value($iid, 'smtp_host')))
 			$retVal['err'] = 'smtp.host.miss';
-		$retVal['smtp_port'] = $this->get_field_value('smtp_port');
+		$retVal['smtp_port'] = $this->get_field_value($iid, 'smtp_port');
 
 		// Check for overrides
-		if (strpos($retVal['smtp_host'], '://'))
-			$retVal['smtp_host'] = substr($retVal['smtp_host'], 6);
-		if ($p = strpos($retVal['smtp_host'], ':'))
+		if ($retVal['smtp_host'])
 		{
-			$retVal['smtp_port'] = substr($retVal['smtp_host'], $p + 1);
-			$retVal['smtp_host'] = substr($retVal['smtp_host'], 0, $p);
+			if (strpos($retVal['smtp_host'], '://'))
+				$retVal['smtp_host'] = substr($retVal['smtp_host'], 6);
+			if ($p = strpos($retVal['smtp_host'], ':'))
+			{
+				$retVal['smtp_port'] = substr($retVal['smtp_host'], $p + 1);
+				$retVal['smtp_host'] = substr($retVal['smtp_host'], 0, $p);
+			}
 		}
 		if (!$retVal['smtp_port'])
 			$retVal['err'] = 'smtp.port.num';
@@ -844,20 +855,20 @@ class identy_switch_prefs extends rcube_plugin
 			$retVal['err'] = 'smtp.port.num';
 		elseif ($retVal['smtp_port'] < 1 || $retVal['smtp_port'] > 65535)
 			$retVal['err'] = 'smpt.port.range';
-		if (($retVal['smtp_auth'] = $this->get_field_value('smtp_auth')) == 'imap')
+		if (($retVal['smtp_auth'] = $this->get_field_value($iid, 'smtp_auth')) == 'imap')
 			$retVal['flags'] |= self::SMTP_IMAP;
 
 		// Check notification options
-		if ($this->get_field_value('notify_all_folder'))
+		if ($this->get_field_value($iid, 'notify_all_folder'))
 			$retVal['flags'] |= self::CHECK_ALLFOLDER;
-		if ($this->get_field_value('notify_basic'))
+		if ($this->get_field_value($iid, 'notify_basic'))
 			$retVal['flags'] |= self::NOTIFY_BASIC;
-		if ($this->get_field_value('notify_desktop'))
+		if ($this->get_field_value($iid, 'notify_desktop'))
 			$retVal['flags'] |= self::NOTIFY_DESKTOP;
-		if ($this->get_field_value('notify_sound'))
+		if ($this->get_field_value($iid, 'notify_sound'))
 			$retVal['flags'] |= self::NOTIFY_SOUND;
-		$retVal['notify_timeout'] = $this->get_field_value('notify_timeout');
-		$retVal['newmail_check'] = $this->get_field_value('refresh_interval') * 60;
+		$retVal['notify_timeout'] = $this->get_field_value($iid, 'notify_timeout');
+		$retVal['newmail_check'] = $this->get_field_value($iid, 'refresh_interval') * 60;
 
 		return $retVal;
 	}
@@ -865,20 +876,63 @@ class identy_switch_prefs extends rcube_plugin
 	/**
 	 * 	Get field value in settings
 	 *
+	 * 	@param string $iid		identy_switch id
 	 * 	@param string $field 	Field name
 	 * 	@param bool $trim		Whether to trim data
 	 * 	@param bool $html		Allow HTML tags in field value
 	 * 	@return string|NULL		Request parameter value or NULL if not set
 	 */
-	private function get_field_value(string $field, bool $trim = true, bool $html = false): ?string
+	private function get_field_value(string $iid, string $field, bool $trim = true, bool $html = false): ?string
 	{
-		$rc = rcube_utils::get_input_value('_'.$field, rcube_utils::INPUT_POST, $html);
+		if (!($rc = rcube_utils::get_input_value('_'.$field, rcube_utils::INPUT_POST, $html)) && $iid)
+		{
+			if ($field == 'imap_auth')
+			{
+				$rc = (int)self::get($iid, 'flags');
+				if ($rc & self::IMAP_SSL)
+					$rc = 'ssl';
+				elseif ($rc & self::IMAP_TLS)
+					$rc = 'tsl';
+				else
+					$rc = '';
+			}
+			elseif ($field == 'smtp_auth')
+			{
+				$rc = (int)self::get($iid, 'flags');
+				$rc = $rc & self::SMTP_IMAP ? 'imap' : '';
+			}
+			elseif ($field == 'notify_all_folder')
+			{
+				$rc = (int)self::get($iid, 'flags');
+				$rc = $rc & self::CHECK_ALLFOLDER ? '1' : '0';
+			}
+			elseif ($field == 'notify_basic')
+			{
+				$rc = (int)self::get($iid, 'flags');
+				$rc = $rc & self::NOTIFY_BASIC ? '1' : '0';
+			}
+			elseif ($field == 'notify_desktop')
+			{
+				$rc = (int)self::get($iid, 'flags');
+				$rc = $rc & self::NOTIFY_DESKTOP ? '1' : '0';
+			}
+			elseif ($field == 'notify_sound')
+			{
+				$rc = (int)self::get($iid, 'flags');
+				$rc = $rc & self::NOTIFY_SOUND ? '1' : '0';
+			}
+			else
+				$rc = self::get($iid, $field);
+		}
 
 		if (!$trim)
 			return $rc;
 
 		if (is_null($rc))
-			return null;
+			return $rc;
+
+		if (!is_string($rc))
+			$rc = (string)$rc;
 
 		$s = trim($rc);
 		if (!$s)
