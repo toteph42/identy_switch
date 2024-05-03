@@ -164,12 +164,29 @@ class identy_switch extends identy_switch_prefs
 				self::set(-1, 'imap_port', $_SESSION['storage_port']);
 				if ($_SESSION['storage_ssl'] == 'ssl')
 					self::set(-1, 'flags', (int)self::get(-1, 'flags') | self::IMAP_SSL);
-				if ($_SESSION['storage_ssl'] == 'tsl')
+				if ($_SESSION['storage_ssl'] == 'tls')
 					self::set(-1, 'flags', (int)self::get(-1, 'flags') | self::IMAP_TLS);
 				self::set(-1, 'imap_delim', $_SESSION['imap_delimiter']);
 
 				// Swap SMTP data
-				$host = $rc->config->get('smtp_host');
+				$hosts = $rc->config->get('smtp_host');
+				if (!is_array ($hosts))
+					$hosts = [ $_SESSION['storage_host'] => $hosts ];
+				$host = null;
+				foreach ($hosts as $imap => $smtp)
+				{
+					if (!strcmp($imap, $_SESSION['storage_host']))
+					{
+						$host = $smtp;
+						break;
+					}
+				}
+				if (!$host)
+				{
+					self::write_log('Cannot discover associated SMTP host to IMAP server "'.$_SESSION['storage_host'].'" '.
+									 '- substituting with "localhost"');
+					$host = 'localhost';
+				}
 				$p = 0;
 				if (substr($host, 3, 1) == ':')
 				{

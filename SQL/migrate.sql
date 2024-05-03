@@ -41,3 +41,4 @@ SELECT
     `trash_mbox`
 FROM
     ident_switch;
+DROP TABLE IF EXISTS ident_switch;

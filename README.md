@@ -4,9 +4,9 @@
 ![](https://img.shields.io/packagist/l/toteph42/identy_switch.svg)
 ![](https://img.shields.io/packagist/dt/toteph42/identy_switch.svg)
 
-This plugin is based on the ![ident_switch](https://github.com/dougluce/ident_switch "ident_switch") plugin. It is completly rewritten and additional features has been added.
+This plugin is based on the [ident_switch](https://github.com/dougluce/ident_switch "ident_switch") plugin. It is completly rewritten and additional features have been added.
 
-This plugin allows users to switch between different accounts in single Roundcube session like this:
+This plugin allows users to switch between different accounts in a single Roundcube session like this:
 
 ![Screenshot example](./assets/Pic01.png "Identity selection")
 
@@ -79,6 +79,10 @@ If you've select **Check all folders**, this has a huge impact on the time new-m
 
 Please don't forget to set `Special Folders` in `Settings` -> `Preferences`. All folders specified there (and their sub-folders) will be excluded from new-mail checking.
 
+### Migration from ident_switch plugin ###
+
+If you've installed the `ident_switch` plugin, there is a migration file available in `SQL` subdirectory which copies the content of the old table to the new table and deletes the `ident_switch` table. To make this happen, you should first install this plugin (during installation a table `identy_switch` will automatically be created) and then you should appy `SQL/migrate.sql`. 
+
 ### Version compatibility ###
 
 * Versions 1.x - for Roundcube v1.6. Requires PHP version >= 8.0.0.
@@ -93,4 +97,4 @@ If you like this software and you want support my work, feel free to send me a d
 
 <a href="https://www.paypal.com/donate/?hosted_button_id=DS6VK49NAFHEQ" target="_blank" rel="noopener">   <img src="https://www.paypalobjects.com/en_US/DK/i/btn/btn_donateCC_LG.gif" alt="Donate with PayPal"/> </a>
 
-
+[[List of all changes](./Changes.md)] 

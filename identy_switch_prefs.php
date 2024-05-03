@@ -672,10 +672,6 @@ class identy_switch_prefs extends rcube_plugin
 	{
 		$rc = rcmail::get_instance();
 
-		// Do not do anything for default identity
-		if (strcasecmp($args['record']['email'], $rc->user->data['username']) === 0)
-			return $args;
-
 		$data = $this->check_field_values();
 		if (isset($data['err']))
 		{
@@ -685,6 +681,10 @@ class identy_switch_prefs extends rcube_plugin
 
 			return $args;
 		}
+
+		// Any identy_switch data?
+		if (!count($data))
+			return $args;
 
 		$data['iid'] = $args['id'];
 
@@ -892,7 +892,7 @@ class identy_switch_prefs extends rcube_plugin
 				if ($rc & self::IMAP_SSL)
 					$rc = 'ssl';
 				elseif ($rc & self::IMAP_TLS)
-					$rc = 'tsl';
+					$rc = 'tls';
 				else
 					$rc = '';
 			}

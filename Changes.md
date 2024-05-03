@@ -1,5 +1,12 @@
 # Changelog Ident switch plugin
 
+## Release 1.0.13
+
+- Thank to https://github.com/HLFH 
+- type 'tsl' fixed to 'tls'
+- some README.MD types fixed
+- support for SMTP array in config.inc.php ($config['smtp_host'])
+
 ## Release 1.0.12
 
 - 'dont_override' option documented
