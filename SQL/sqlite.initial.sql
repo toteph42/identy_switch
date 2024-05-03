@@ -1,5 +1,6 @@
 -- Created with: https://sqliteonline.com/
 
+DROP TABLE IF EXISTS ident_switch;
 CREATE TABLE IF NOT EXISTS `identy_switch`(
 	`id` INTEGER  NOT NULL ,
 	`user_id` INTEGER  NOT NULL REFERENCES users(user_id) ON DELETE CASCADE ON UPDATE CASCADE,
