@@ -169,23 +169,27 @@ class identy_switch extends identy_switch_prefs
 				self::set(-1, 'imap_delim', $_SESSION['imap_delimiter']);
 
 				// Swap SMTP data
-				$host = $rc->config->get('smtp_host');
-				$p = 0;
-				if (substr($host, 3, 1) == ':')
-				{
-					self::set(-1, 'smtp_port', 465);
-					self::set(-1, 'flags', self::get(-1, 'flags') | self::SMTP_IMAP);
-					$host = substr($host, 6);
-				} else
-					self::set(-1, 'smtp_port', 587);
-				if (($p = strpos($host, ':')) !== false)
-				{
-					self::set(-1, 'smtp_port', substr($host, $p + 1));
-					self::set(-1, 'smtp_host', substr($host, 0, $p));
-				} else
-					self::set(-1, 'smtp_host', $host);
+				$hosts = $rc->config->get('smtp_host');
 
-				$prefs = $rc->user->get_prefs();
+				foreach ($hosts as $imap_host => $smtp_host) {
+    					$p = 0;
+    					if (substr($smtp_host, 3, 1) == ':') {
+        					self::set(-1, 'smtp_port', 465);
+        					self::set(-1, 'flags', self::get(-1, 'flags') | self::SMTP_IMAP);
+        					$smtp_host = substr($smtp_host, 6);
+    					} else {
+        					self::set(-1, 'smtp_port', 587);
+    					}
+    
+    					if (($p = strpos($smtp_host, ':')) !== false) {
+        					self::set(-1, 'smtp_port', substr($smtp_host, $p + 1));
+        					self::set(-1, 'smtp_host', substr($smtp_host, 0, $p));
+    					} else {
+        					self::set(-1, 'smtp_host', $smtp_host);
+    					}
+
+    					$prefs = $rc->user->get_prefs();
+				}
 
 				// Swap nofication data
 				$p = 'newmail_notifier_';
