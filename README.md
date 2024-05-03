@@ -4,9 +4,9 @@
 ![](https://img.shields.io/packagist/l/toteph42/identy_switch.svg)
 ![](https://img.shields.io/packagist/dt/toteph42/identy_switch.svg)
 
-This plugin is based on the [ident_switch](https://github.com/dougluce/ident_switch "ident_switch") plugin. It is completly rewritten and additional features has been added.
+This plugin is based on the [ident_switch](https://github.com/dougluce/ident_switch "ident_switch") plugin. It is completly rewritten and additional features have been added.
 
-This plugin allows users to switch between different accounts in single Roundcube session like this:
+This plugin allows users to switch between different accounts in a single Roundcube session like this:
 
 ![Screenshot example](./assets/Pic01.png "Identity selection")
 
