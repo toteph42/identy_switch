@@ -1,5 +1,6 @@
 --  Created with phpmyadmin
 
+DROP TABLE IF EXISTS ident_switch;
 CREATE TABLE IF NOT EXISTS `identy_switch`(
     `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
     `user_id` INT(10) UNSIGNED NOT NULL,
