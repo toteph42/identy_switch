@@ -20,7 +20,7 @@ $config['identy_switch.config'] = [
 		'imap' => 'imap://imap.domain.tld:143',
 
 		// Login name, can be 'email' (full address from identity), 'mbox' (only mailbox part).
-		// Any other value is threated as 'not specified' (default).
+		// Any other value is treated as 'not specified' (default).
 		'user' => 'email',
 
 		// SMTP host name, use ssl:// or tls:// notation if needed, for no security use imap:// 
