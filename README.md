@@ -12,7 +12,7 @@ This plugin allows users to switch between different accounts in a single Roundc
 
 ### SQL ###
 
-Go in the SQL folder of the repo, select the right SQL query statement based on which DBMS your roundcubemail database is set (SQLite, MySQL/MariaDB, PostgreSQL).
+Go to the SQL folder of the repo, select the right SQL query statement based on which DBMS your roundcubemail database is set (SQLite, MySQL/MariaDB, PostgreSQL).
 If you migrated from the `ident_switch` to the `identy_switch` plugin, don't forget to drop your former `ident_switch` table.
 For MySQL/MarriaDB, you can do:
 > DROP TABLE IF EXISTS ident_switch;
