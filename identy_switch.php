@@ -347,8 +347,8 @@ class identy_switch extends identy_switch_prefs
 		$prefs = $rc->user->get_prefs();
 
 		// Set special folder
-		$prefs['show_real_foldernames'] = $rec['flags'] & self::SHOW_REAL_FOLDER ? '1' : '0';
-		$prefs['lock_special_folders'] = $rec['flags'] & self::LOCK_SPECIAL_FOLDER ? '1' : '0';
+		$prefs['show_real_foldernames'] = $rec['flags'] & self::SHOW_REAL_FOLDER ? true : false;
+		$prefs['lock_special_folders'] = $rec['flags'] & self::LOCK_SPECIAL_FOLDER ? true : false;
 		foreach (rcube_storage::$folder_types as $mbox)
 			$prefs[$mbox.'_mbox'] = $rec[$mbox];
 		$prefs['check_all_folders'] = $rec['flags'] & self::CHECK_ALLFOLDER ? '1' : '0';

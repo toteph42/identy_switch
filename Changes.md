@@ -1,5 +1,9 @@
 # Changelog Ident switch plugin
 
+## Release 1.0.15
+
+- Bug fixed in 'show_special_folder' and 'show_real_foldernames'
+
 ## Release 1.0.14
 
 - Error message prefixed by "idsw"
