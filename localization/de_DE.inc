@@ -40,16 +40,16 @@ $labels['idsw.notify.timeout'] = 'Desktop-Benachrichtigung schließen';
 $labels['idsw.notify.sound'] = 'Akustische Meldung bei neuer Nachricht';
 $labels['idsw.notify.test'] = 'Test';
 
-$labels['err.imap.host.miss'] = 'Der Wert im Feld \'IMAP Server host name\' fehlt.';
-$labels['err.imap.auth'] = 'Der Wert im Feld \'IMAP Verschlüsselung\' ist ungültig.';
-$labels['err.imap.port.num'] = 'Der Wert in \'IMAP Port\' muss eine Zahl sein.';
-$labels['err.imap.port.range'] = 'Der Wert in \'IMAP Port\' muss zwischen 1 und 65535 liegen.';
-$labels['err.imap.delim.miss'] = 'Der Wert im Feld \'IMAP Verzeichnistrenner\' fehlt.';
-$labels['err.imap.user.miss'] = 'Der Wert im Feld \'IMAP Benutzername\' fehlt.';
-$labels['err.imap.pwd.miss'] = 'Der Wert im Feld \'IMAP Password\' fehlt.';
-$labels['err.smpt.host.miss'] = 'Der Wert im Feld \'SMTP Servername\' fehlt.';
-$labels['err.smtp.port.num'] = 'Der Wert in \'SMTP Port\' muss eine Zahl sein.';
-$labels['err.smtp.port.range'] = 'Der Wert in \'SMTP Port\' muss zwischen 1 und 65535 liegen.';
+$labels['idsw.err.imap.host.miss'] = 'Der Wert im Feld \'IMAP Server host name\' fehlt.';
+$labels['idsw.err.imap.auth'] = 'Der Wert im Feld \'IMAP Verschlüsselung\' ist ungültig.';
+$labels['idsw.err.imap.port.num'] = 'Der Wert in \'IMAP Port\' muss eine Zahl sein.';
+$labels['idsw.err.imap.port.range'] = 'Der Wert in \'IMAP Port\' muss zwischen 1 und 65535 liegen.';
+$labels['idsw.err.imap.delim.miss'] = 'Der Wert im Feld \'IMAP Verzeichnistrenner\' fehlt.';
+$labels['idsw.err.imap.user.miss'] = 'Der Wert im Feld \'IMAP Benutzername\' fehlt.';
+$labels['idsw.err.imap.pwd.miss'] = 'Der Wert im Feld \'IMAP Password\' fehlt.';
+$labels['idsw.err.smtp.host.miss'] = 'Der Wert im Feld \'SMTP Servername\' fehlt.';
+$labels['idsw.err.smtp.port.num'] = 'Der Wert in \'SMTP Port\' muss eine Zahl sein.';
+$labels['idsw.err.smtp.port.range'] = 'Der Wert in \'SMTP Port\' muss zwischen 1 und 65535 liegen.';
 
 $labels['identity'] = 'Identität';
 $labels['notify.title'] = 'Neue E-Mails';

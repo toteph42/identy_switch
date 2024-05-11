@@ -1,5 +1,12 @@
 # Changelog Ident switch plugin
 
+## Release 1.0.14
+
+- Error message prefixed by "idsw"
+- If identy is set as default, hen disable identy_switch handling
+- If a new record is created, it is not possible to return any error message due to RoundCube design.
+- Fixed some error messages
+
 ## Release 1.0.13
 
 - Thank to https://github.com/HLFH 

@@ -40,16 +40,16 @@ $labels['idsw.notify.timeout'] = 'Close desktop notification';
 $labels['idsw.notify.sound'] = 'Play sound on new message';
 $labels['idsw.notify.test'] = 'Test';
 
-$labels['err.imap.host.miss'] = 'Value in \'IMAP Server host name\' missing.';
-$labels['err.imap.auth'] = 'Value in \'IMAP Authorization\' field is invalid.';
-$labels['err.imap.port.num'] = 'Value in \'IMAP Port\' field must be a number.';
-$labels['err.imap.port.range'] = 'Value in \'IMAP Port\' field must be between 1 and 65535.';
-$labels['err.imap.delim.miss'] = 'Value in \'IMAP Folder hierarchy delimiter\' missing.';
-$labels['err.imap.user.miss'] = 'Value in \'IMAP User name\' missing.';
-$labels['err.imap.pwd.miss'] = 'Value in \'IMAP Password\' missing.';
-$labels['err.smpt.host.miss'] = 'Value in \'SMTP Server host name\' missing.';
-$labels['err.smpt.port.num'] = 'Value in \'SMTP Port\' field must be a number.';
-$labels['err.smpt.port.range'] = 'Value in \'SMTP Port\' field must be between 1 and 65535.';
+$labels['idsw.err.imap.host.miss'] = 'Value in \'IMAP Server host name\' missing.';
+$labels['idsw.err.imap.auth'] = 'Value in \'IMAP Authorization\' field is invalid.';
+$labels['idsw.err.imap.port.num'] = 'Value in \'IMAP Port\' field must be a number.';
+$labels['idsw.err.imap.port.range'] = 'Value in \'IMAP Port\' field must be between 1 and 65535.';
+$labels['idsw.err.imap.delim.miss'] = 'Value in \'IMAP Folder hierarchy delimiter\' missing.';
+$labels['idsw.err.imap.user.miss'] = 'Value in \'IMAP User name\' missing.';
+$labels['idsw.err.imap.pwd.miss'] = 'Value in \'IMAP Password\' missing.';
+$labels['idsw.err.smtp.host.miss'] = 'Value in \'SMTP Server host name\' missing.';
+$labels['idsw.err.smtp.port.num'] = 'Value in \'SMTP Port\' field must be a number.';
+$labels['idsw.err.smtp.port.range'] = 'Value in \'SMTP Port\' field must be between 1 and 65535.';
 
 $labels['identity'] = 'Identity';
 $labels['notify.title'] = 'New Emails';

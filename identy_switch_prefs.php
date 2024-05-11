@@ -672,12 +672,20 @@ class identy_switch_prefs extends rcube_plugin
 	{
 		$rc = rcmail::get_instance();
 
+ 		if (!self::get_field_value('0', 'enabled', false))
+		{
+			$sql = 'UPDATE ' . $rc->db->table_name(self::TABLE) . ' SET flags = flags & ? WHERE iid = ? AND user_id = ?';
+			$rc->db->query($sql, ~self::ENABLED, $args['id'], $rc->user->ID);
+			return $args;
+		}
+
 		$data = $this->check_field_values();
 		if (isset($data['err']))
 		{
 			$this->add_texts('localization');
-			$args['abort'] = true;
-			$args['message'] = $this->gettext('err.'.$data['err']);
+			$args['break']   = $args['abort'] = true;
+			$args['message'] = $this->gettext('idsw.err.'.$data['err']);
+			$args['result']  = false;
 
 			return $args;
 		}
@@ -789,27 +797,25 @@ class identy_switch_prefs extends rcube_plugin
 		$retVal = [];
 
 		$iid = (string)rcube_utils::get_input_value('_iid', rcube_utils::INPUT_POST);
-		if (!isset($_SESSION[self::TABLE][$iid]))
-			return $retVal;
 
-		if ($this->get_field_value($iid, 'enabled'))
+		if (self::get_field_value($iid, 'enabled'))
 			$retVal['flags'] = self::ENABLED;
 		else
 			$retVal['flags'] &= ~self::ENABLED;
 
-		if (!($retVal['label'] = $this->get_field_value($iid, 'label')))
+		if (!($retVal['label'] = self::get_field_value($iid, 'label')))
 			$retVal['label'] = 'identy_switch';
 
-		if (!($retVal['imap_host'] = $this->get_field_value($iid, 'imap_host')))
+		if (!($retVal['imap_host'] = self::get_field_value($iid, 'imap_host')))
 			$retVal['err'] = 'imap.host.miss';
-		if (!($retVal['imap_auth'] = $this->get_field_value($iid, 'imap_auth')))
+		if (!($retVal['imap_auth'] = self::get_field_value($iid, 'imap_auth')))
 			$retVal['err'] = 'imap.auth';
-		$retVal['imap_port'] = $this->get_field_value($iid, 'imap_port');
-		if (!($retVal['imap_user'] = $this->get_field_value($iid, 'imap_user')))
+		$retVal['imap_port'] = self::get_field_value($iid, 'imap_port');
+		if (!($retVal['imap_user'] = self::get_field_value($iid, 'imap_user')))
 			$retVal['err'] = 'imap.user.miss';
-		if (!($retVal['imap_pwd'] = $this->get_field_value($iid, 'imap_pwd', true, true)))
+		if (!($retVal['imap_pwd'] = self::get_field_value($iid, 'imap_pwd', true, true)))
 			$retVal['err'] = 'imap.pwd.miss';
-		if (!($retVal['imap_delim'] = $this->get_field_value($iid, 'imap_delim')))
+		if (!($retVal['imap_delim'] = self::get_field_value($iid, 'imap_delim')))
 			$retVal['err'] = 'imap.delim.miss';
 
 		// Check for overrides
@@ -834,9 +840,9 @@ class identy_switch_prefs extends rcube_plugin
 		elseif ($retVal['imap_auth'] == 'tls')
 			$retVal['flags'] |= self::IMAP_TLS;
 
-		if (!($retVal['smtp_host'] = $this->get_field_value($iid, 'smtp_host')))
+		if (!($retVal['smtp_host'] = self::get_field_value($iid, 'smtp_host')))
 			$retVal['err'] = 'smtp.host.miss';
-		$retVal['smtp_port'] = $this->get_field_value($iid, 'smtp_port');
+		$retVal['smtp_port'] = self::get_field_value($iid, 'smtp_port');
 
 		// Check for overrides
 		if ($retVal['smtp_host'])
@@ -855,20 +861,20 @@ class identy_switch_prefs extends rcube_plugin
 			$retVal['err'] = 'smtp.port.num';
 		elseif ($retVal['smtp_port'] < 1 || $retVal['smtp_port'] > 65535)
 			$retVal['err'] = 'smpt.port.range';
-		if (($retVal['smtp_auth'] = $this->get_field_value($iid, 'smtp_auth')) == 'imap')
+		if (($retVal['smtp_auth'] = self::get_field_value($iid, 'smtp_auth')) == 'imap')
 			$retVal['flags'] |= self::SMTP_IMAP;
 
 		// Check notification options
-		if ($this->get_field_value($iid, 'notify_all_folder'))
+		if (self::get_field_value($iid, 'notify_all_folder'))
 			$retVal['flags'] |= self::CHECK_ALLFOLDER;
-		if ($this->get_field_value($iid, 'notify_basic'))
+		if (self::get_field_value($iid, 'notify_basic'))
 			$retVal['flags'] |= self::NOTIFY_BASIC;
-		if ($this->get_field_value($iid, 'notify_desktop'))
+		if (self::get_field_value($iid, 'notify_desktop'))
 			$retVal['flags'] |= self::NOTIFY_DESKTOP;
-		if ($this->get_field_value($iid, 'notify_sound'))
+		if (self::get_field_value($iid, 'notify_sound'))
 			$retVal['flags'] |= self::NOTIFY_SOUND;
-		$retVal['notify_timeout'] = $this->get_field_value($iid, 'notify_timeout');
-		$retVal['newmail_check'] = $this->get_field_value($iid, 'refresh_interval') * 60;
+		$retVal['notify_timeout'] = self::get_field_value($iid, 'notify_timeout');
+		$retVal['newmail_check'] = self::get_field_value($iid, 'refresh_interval') * 60;
 
 		return $retVal;
 	}
