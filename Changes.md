@@ -2,7 +2,8 @@
 
 ## Release 1.0.15
 
-- Bug fixed in 'show_special_folder' and 'show_real_foldernames'
+- Bug fixed for 'show_real_foldernames'
+- Special message before record has been created added
 
 ## Release 1.0.14
 

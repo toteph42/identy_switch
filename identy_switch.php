@@ -224,12 +224,10 @@ class identy_switch extends identy_switch_prefs
 				// Swap special folder names
 				foreach (rcube_storage::$folder_types as $mbox)
 					self::set(-1, $mbox, isset($prefs[$mbox.'_mbox']) ? $prefs[$mbox.'_mbox'] : '');
-				if (isset($prefs['show_real_foldernames']))
+				if ($prefs['show_real_foldernames'] == 'true')
 					self::set(-1, 'flags', self::get(-1, 'flags') | self::SHOW_REAL_FOLDER);
-				if (!in_array('lock_special_folders', isset($prefs['dont_override']) ?
-							  $prefs['dont_override'] : [] ))
-					self::set(-1, 'flags', self::get(-1, 'flags') | (isset($prefs['lock_special_folders']) &&
-									   $prefs['lock_special_folders'] == '1' ? self::LOCK_SPECIAL_FOLDER : 0));
+				self::set(-1, 'flags', self::get(-1, 'flags') | (isset($prefs['lock_special_folders']) &&
+				   $prefs['lock_special_folders'] == true ? self::LOCK_SPECIAL_FOLDER : 0));
 
 				// Volatile variables
 				self::set(-1, 'unseen', 0);

@@ -10,6 +10,7 @@ declare(strict_types=1);
 $labels = [];
 
 $labels['idsw.common.caption'] = 'Data of your identity';
+$labels['idsw.common.noedit'] = 'Informationen about identity cannot being entered until record has been saved the first time';
 $labels['idsw.common.enabled'] = 'Enabled';
 $labels['idsw.common.label'] = 'Label';
 

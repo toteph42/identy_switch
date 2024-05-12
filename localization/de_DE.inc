@@ -10,6 +10,7 @@ declare(strict_types=1);
 $labels = [];
 
 $labels['idsw.common.caption'] = 'Daten der Identität';
+$labels['idsw.common.noedit'] = 'Informationen zur Identität können vor dem ersten Speichern nicht eingegeben werden';
 $labels['idsw.common.enabled'] = 'Aktiviert';
 $labels['idsw.common.label'] = 'Bezeichnung';
 

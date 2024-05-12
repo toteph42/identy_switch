@@ -533,7 +533,8 @@ class identy_switch_prefs extends rcube_plugin
 		$this->add_texts('localization');
 
 		$args['form']['common'] = [
-			'name' 	  => $this->gettext('idsw.common.caption'),
+			'name' 	  => isset($args['record']['identity_id']) ? $this->gettext('idsw.common.caption') :
+						 $this->gettext('idsw.common.noedit'),
 			'content' => $this->get_common_form($args),
 		];
 
@@ -569,20 +570,25 @@ class identy_switch_prefs extends rcube_plugin
 
 		// Edit existing identity record?
 		if (isset($args['record']['identity_id']))
+		{
 	        $rec = self::get($args['record']['identity_id']);
+	        $ro  = '';
+		} else
+			$ro  = 'true';
 
         $args['record']['label'] = $rec ? $rec['label'] : '';
 
         $ise = $rec ? ($rec['flags'] & self::ENABLED ? '1' : '0') : '0';
-		$ena = new html_checkbox([   'name' 	=> '_enabled',
-								     'onchange' => 'identy_switch_enabled();',
-								  	 'value' 	=> $ise ]);
+		$ena = new html_checkbox([  'name' 		=> '_enabled',
+								    'onchange'  => 'identy_switch_enabled();',
+								  	'value' 	=> $ise,
+									'disabled'	=> $ro, ]);
 
 		return [
 			'enabled'		=> [ 'label' => $this->gettext('idsw.common.enabled'),
 								 'value' => $ena->show($ise), ],
 			'label' 		=> [ 'label' => $this->gettext('idsw.common.label'),
-								 'type' => 'text', 'maxlength' => 32 ],
+								 'type'  => 'text', 'maxlength' => 32 ],
 		];
 	}
 
@@ -796,7 +802,7 @@ class identy_switch_prefs extends rcube_plugin
 	{
 		$retVal = [];
 
-		$iid = (string)rcube_utils::get_input_value('_iid', rcube_utils::INPUT_POST);
+		$iid = (string)rcube_utils::get_input_value('iid', rcube_utils::INPUT_POST);
 
 		if (self::get_field_value($iid, 'enabled'))
 			$retVal['flags'] = self::ENABLED;
