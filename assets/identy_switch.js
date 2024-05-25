@@ -29,6 +29,18 @@ $(function() {
         $sw.show();
 });
 
+// Catch all mouse clicks
+$(document).click(function(event) { 
+    
+    // Check for left button
+    if (event.button == 0) {
+	    var id = event.target.id;
+		var d = $('#identy_switch_dropdown'); 
+	    if (id != 'identy_switch_menu' && !d.is(':hidden'))
+			d.hide();
+    }
+});
+
 // Plugin initialization
 function identy_switch_init() {
     rcmail.addEventListener('plugin.identy_switch_notify', identy_switch_notify)
