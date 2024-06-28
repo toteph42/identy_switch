@@ -20,8 +20,8 @@ CREATE TABLE IF NOT EXISTS `identy_switch`(
     `junk` VARCHAR(64) DEFAULT '',
     `trash` VARCHAR(64) DEFAULT '',
     UNIQUE KEY `user_id_label`(`user_id`, `label`),
-    CONSTRAINT `fk_user_id` FOREIGN KEY(`user_id`) REFERENCES `users`(`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT `fk_identity_id` FOREIGN KEY(`iid`) REFERENCES `identities`(`identity_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT `fk_identy_user_id` FOREIGN KEY(`user_id`) REFERENCES `users`(`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT `fk_identy_identity_id` FOREIGN KEY(`iid`) REFERENCES `identities`(`identity_id`) ON DELETE CASCADE ON UPDATE CASCADE,
     PRIMARY KEY(`id`),
     INDEX `IX_identy_switch_user_id`(`user_id`),
     INDEX `IX_identy_switch_iid`(`iid`)
