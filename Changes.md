@@ -1,7 +1,15 @@
 # Changelog Ident switch plugin
 
+## Release 1.0.18
+
+- Fixed issue #8: CodeShakingSheep pull request merged to fix MySQL DB table creation for migration from ident_switch plugin
+- Fixed issue #9: Protocol selection for SMTP now possible
+- Fixed issue #10: CodeShakingSheep pull request merged to fix ident_switch migration DB INSERT statement
+- Fixed issue #13: PHP 8.1 warnings for 'show_real_foldernames'
+- Fixed issue #13: PHP 8.1 warnings for unknown special folder names
+
 ## Release 1.0.17
-.
+
 - Identyswitch menu is now automatically closed if user clicks somewhere on screen
 
 ## Release 1.0.15

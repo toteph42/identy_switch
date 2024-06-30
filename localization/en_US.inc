@@ -29,9 +29,10 @@ $labels['idsw.smtp.caption'] = 'SMTP';
 $labels['idsw.smtp.host'] = 'Server host name';
 $labels['idsw.smtp.tls'] = 'Secure connection (TLS)';
 $labels['idsw.smtp.port'] = 'Port';
-$labels['idsw.smtp.auth'] = 'Authorization';
-$labels['idsw.smtp.auth.imap'] = 'As IMAP';
+$labels['idsw.smtp.auth'] = 'Encryption';
 $labels['idsw.smtp.auth.none'] = 'None';
+$labels['idsw.smtp.auth.ssl'] = 'SSL';
+$labels['idsw.smtp.auth.tls'] = 'TLS';
 
 $labels['idsw.notify.caption'] = 'New messages';
 $labels['idsw.notify.allfolder'] = 'Check all folders for new messages';
@@ -42,7 +43,6 @@ $labels['idsw.notify.sound'] = 'Play sound on new message';
 $labels['idsw.notify.test'] = 'Test';
 
 $labels['idsw.err.imap.host.miss'] = 'Value in \'IMAP Server host name\' missing.';
-$labels['idsw.err.imap.auth'] = 'Value in \'IMAP Authorization\' field is invalid.';
 $labels['idsw.err.imap.port.num'] = 'Value in \'IMAP Port\' field must be a number.';
 $labels['idsw.err.imap.port.range'] = 'Value in \'IMAP Port\' field must be between 1 and 65535.';
 $labels['idsw.err.imap.delim.miss'] = 'Value in \'IMAP Folder hierarchy delimiter\' missing.';

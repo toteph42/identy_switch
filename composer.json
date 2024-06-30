@@ -28,7 +28,8 @@
 	"require" : {
 		"php" : ">=8.0.0",
 		"roundcube/plugin-installer" : ">=0.1.3",
-		"ext-ctype" : "*"
+		"ext-ctype" : "*",
+		"boressoft/ident_switch": "*"
 	},
 	"conflict" : {
 		"elm/identity_smtp" : "*",
@@ -41,6 +42,11 @@
 		"roundcube" : {
 			"min-version" : "1.6",
 			"sql-dir" : "SQL"
+		}
+	},
+	"config": {
+		"allow-plugins": {
+			"roundcube/plugin-installer": true
 		}
 	}
 }

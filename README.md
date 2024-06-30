@@ -23,14 +23,14 @@ This plugin allows users to switch between different accounts in a single Roundc
 * **Label** - Text that will be displayed in drop down list for this identity. 
 * **IMAP**
     * **Server host name** - Host name for imap server. If left blank 'localhost' will be used.
-    * **Encryption** - Enabled secure connection (TLS or SSL).
+    * **Encryption** - Connection security (None, SSL or TLS).
     * **Port** - Port on server to connect to. If left blank 143 will be used.
     * **Username** - Login used *for IMAP and SMTP servers*.
     * **Password** - Password used *for IMAP and SMTP servers*. It's stored encrypted in database.
 * **SMTP**
     * **Server host name** - Host name for imap server. If left blank 'localhost' will be used.
-    * **Port** - Port on server to connect to. If left blank 587 will be used.
-    * **Authorization** - Select if same security should be used as for IMAP.
+    * **Encryption** - Connection security (None, SSL or TLS).
+    * **Port** - Port on server to connect to. If left blank 25 will be used.
     
 ### Settings for active identity ###
 

@@ -30,8 +30,9 @@ $labels['idsw.smtp.host'] = 'Servername';
 $labels['idsw.smtp.tls'] = 'Sichere Verbindung (TLS)';
 $labels['idsw.smtp.port'] = 'Port';
 $labels['idsw.smtp.auth'] = 'Verschlüsselung';
-$labels['idsw.smtp.auth.imap'] = 'Wie IMAP';
 $labels['idsw.smtp.auth.none'] = 'Keine';
+$labels['idsw.smtp.auth.ssl'] = 'SSL';
+$labels['idsw.smtp.auth.tls'] = 'TLS';
 
 $labels['idsw.notify.caption'] = 'Neue Nachrichten';
 $labels['idsw.notify.allfolder'] = 'Alle Ordner auf neue Nachrichten prüfen';
@@ -42,7 +43,6 @@ $labels['idsw.notify.sound'] = 'Akustische Meldung bei neuer Nachricht';
 $labels['idsw.notify.test'] = 'Test';
 
 $labels['idsw.err.imap.host.miss'] = 'Der Wert im Feld \'IMAP Server host name\' fehlt.';
-$labels['idsw.err.imap.auth'] = 'Der Wert im Feld \'IMAP Verschlüsselung\' ist ungültig.';
 $labels['idsw.err.imap.port.num'] = 'Der Wert in \'IMAP Port\' muss eine Zahl sein.';
 $labels['idsw.err.imap.port.range'] = 'Der Wert in \'IMAP Port\' muss zwischen 1 und 65535 liegen.';
 $labels['idsw.err.imap.delim.miss'] = 'Der Wert im Feld \'IMAP Verzeichnistrenner\' fehlt.';

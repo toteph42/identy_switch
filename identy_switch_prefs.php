@@ -18,7 +18,8 @@ class identy_switch_prefs extends rcube_plugin
 	const ENABLED		    	= 0x0001;
 	const IMAP_SSL				= 0x0004;
 	const IMAP_TLS				= 0x0008;
-	const SMTP_IMAP 			= 0x0010;
+	const SMTP_SSL				= 0x0010;
+	const SMTP_TLS				= 0x0020;
 	const NOTIFY_BASIC			= 0x0100;
 	const NOTIFY_DESKTOP		= 0x0200;
 	const NOTIFY_SOUND			= 0x0400;
@@ -26,6 +27,15 @@ class identy_switch_prefs extends rcube_plugin
 	const SHOW_REAL_FOLDER		= 0x1000;
 	const LOCK_SPECIAL_FOLDER	= 0x2000;
 	const UNSEEN				= 0x4000;
+
+	/* 	20240629.sql
+
+		0x14 20 - IMAP_SSL | SAME_AS_IMAP 	-> 0x24 20 IMAP_SSL | SMTP_SSL
+		0x18 24 - IMAP_TLS | SAME_AS_IMAP	-> 0x28 40 IMAP_TLS | SMTP_TLS
+		0x10 16 - NONE 	   | SAME_AS_IMAP	-> 0x00 NONE        | NONE
+		0x04 04 - IMAP_SSL | NONE			-> 0x04 04 IMAP_SSL | NONE
+		0x08 08 - IMAP_TSL | NONE 			-> 0x08 08 IMAP_TLS | NONE
+	*/
 
 	/**
 	 * 	Initialize Plugin
@@ -144,14 +154,14 @@ class identy_switch_prefs extends rcube_plugin
 	    $set['show_real_foldernames']['content'] =
 					$sel->show(($rec['flags'] & self::SHOW_REAL_FOLDER) ? '1' : '0');
 
-		foreach (rcube_storage::$folder_types as $mbox)
+		foreach ($rec['folders'] as $k => $v)
 		{
-			if (isset($no_override[$mbox.'_mbox']))
+			if (isset($no_override[$k.'_mbox']))
 				continue;
 
-			$set[$mbox.'_mbox']['content'] = $fld->show($rec[$mbox], [
-					  							'id' 		=> '_'.$mbox.'_mbox',
-										  		'name' 		=> '_'.$mbox. '_mbox',
+			$set[$k.'_mbox']['content'] = $fld->show($v, [
+					  							'id' 		=> '_'.$k.'_mbox',
+										  		'name' 		=> '_'.$k. '_mbox',
 												'onchange' 	=> "if ($(this).val() == 'INBOX') $(this).val('')",
 					  						 ]);
 		}
@@ -180,18 +190,21 @@ class identy_switch_prefs extends rcube_plugin
 		else
 			self::set($iid, 'flags', $rec['flags'] &= ~self::LOCK_SPECIAL_FOLDER);
 
+		$box = [];
 		foreach (rcube_storage::$folder_types as $mbox)
 			if ($args['prefs'][$mbox.'_mbox'])
-				self::set($iid, $mbox, $rec[$mbox] = $args['prefs'][$mbox.'_mbox']);
+				$box[$mbox] = $args['prefs'][$mbox.'_mbox'];
+
+		self::set($iid, 'folders', $box);
 
 		if ($iid != -1)
 		{
 			$rc = rcmail::get_instance();
 
 			$sql = 'UPDATE '.$rc->db->table_name(self::TABLE).
-				   ' SET flags = ?, drafts = ?, sent = ?, junk = ?, trash = ?'.
+				   ' SET flags = ?, folders = ?'.
 				   ' WHERE iid = ?';
-			$rc->db->query( $sql, $rec['flags'], $rec['drafts'], $rec['sent'], $rec['junk'], $rec['trash'], $iid);
+			$rc->db->query( $sql, $rec['flags'], json_encode($box), $iid);
 
 			// Abuse $plugin['abort'] to prevent RC main from saving prefs
 			$args['abort'] 	= true;
@@ -486,7 +499,7 @@ class identy_switch_prefs extends rcube_plugin
 		if ($email && strcasecmp($email, $rc->user->data['username']) === 0)
 			return $args;
 
-		// Apply config.inc.php
+		// Apply definitions from identy_switch/config.inc.php
 		if (is_array($cfg = $this->get_config($email)))
 		{
 			if (isset($args['record']['identity_id']))
@@ -497,7 +510,6 @@ class identy_switch_prefs extends rcube_plugin
 
 				// Parse and set host and related information
 				$url = parse_url($cfg['imap']);
-
 				self::set($iid, 'imap_host', isset($url['host']) ? rcube::Q($url['host'], 'url') : '');
 				self::set($iid, 'imap_port', isset($url['port']) ? intval($url['port']) : '');
 				if (strcasecmp('tls', $url['scheme']) === 0)
@@ -508,8 +520,10 @@ class identy_switch_prefs extends rcube_plugin
 				$url = parse_url($cfg['smtp']);
 				self::set($iid, 'smtp_host', isset($url['host']) ? rcube::Q($url['host'], 'url') : '');
 				self::set($iid, 'smtp_port', isset($url['port']) ? intval($url['port']) : '');
-				if (strcasecmp('imap', $url['scheme']) !== 0)
-					self::set($iid, 'flags', (int)self::get($iid, 'flags') | self::SMTP_IMAP);
+				if (strcasecmp('tls', $url['scheme']) === 0)
+					self::set($iid, 'flags', (int)self::get($iid, 'flags') | self::SMTP_TLS);
+				if (strcasecmp('ssl', $url['scheme']) === 0)
+					self::set($iid, 'flags', (int)self::get($iid, 'flags') | self::SMTP_SSL);
 
 				// Set up user name
 				if ($cfg['user'])
@@ -614,7 +628,7 @@ class identy_switch_prefs extends rcube_plugin
 
         $args['record']['imap_host'] 	= $rec ? $rec['imap_host'] : '';
         $enc 							= $rec ? ($rec['flags'] & self::IMAP_SSL ? 'ssl' :
-										  ($rec['flags'] & self::IMAP_TLS ? 'tls' : 0)) : '0';
+										  ($rec['flags'] & self::IMAP_TLS ? 'tls' : 'none')) : 'none';
         $args['record']['imap_port'] 	= $rec ? $rec['imap_port'] : '';
         $args['record']['imap_user'] 	= $rec ? $rec['imap_user'] : '';
         $args['record']['imap_pwd'] 	= $rec ? rcmail::get_instance()->decrypt($rec['imap_pwd']) : '';
@@ -652,19 +666,21 @@ class identy_switch_prefs extends rcube_plugin
 
 		$authType = new html_select([ 'name' => "_smtp_auth" ]);
 		$authType->add($this->gettext('idsw.smtp.auth.none'), 'none');
-		$authType->add($this->gettext('idsw.smtp.auth.imap'), 'imap');
+		$authType->add($this->gettext('idsw.smtp.auth.ssl'), 'ssl');
+		$authType->add($this->gettext('idsw.smtp.auth.tls'), 'tls');
 
         $args['record']['smtp_host'] = $rec ? $rec['smtp_host'] : '';
+        $enc 						 = $rec ? ($rec['flags'] & self::SMTP_SSL ? 'ssl' :
+									   ($rec['flags'] & self::SMTP_TLS ? 'tls' : 'none')) : 'none';
         $args['record']['smtp_port'] = $rec ? $rec['smtp_port'] : '';
-        $enc						 = $rec ? ($rec['flags'] & self::SMTP_IMAP ? 'imap' : 'none') : 'none';
 
         return [
 			'smtp_host'	 	=> [ 'label' => $this->gettext('idsw.smtp.host'),
 								 'type' => 'text', 'maxlength' => 64 ],
-			'smtp_port' 	=> [ 'label' => $this->gettext('idsw.smtp.port'),
-								 'type' => 'text', 'maxlength' => 5 ],
 			'smtp_auth' 	=> [ 'label' => $this->gettext('idsw.smtp.auth'),
 								 'value' => $authType->show($enc) ],
+        	'smtp_port' 	=> [ 'label' => $this->gettext('idsw.smtp.port'),
+								 'type' => 'text', 'maxlength' => 5 ],
 		];
 	}
 
@@ -814,8 +830,7 @@ class identy_switch_prefs extends rcube_plugin
 
 		if (!($retVal['imap_host'] = self::get_field_value($iid, 'imap_host')))
 			$retVal['err'] = 'imap.host.miss';
-		if (!($retVal['imap_auth'] = self::get_field_value($iid, 'imap_auth')))
-			$retVal['err'] = 'imap.auth';
+		$retVal['imap_auth'] = self::get_field_value($iid, 'imap_auth');
 		$retVal['imap_port'] = self::get_field_value($iid, 'imap_port');
 		if (!($retVal['imap_user'] = self::get_field_value($iid, 'imap_user')))
 			$retVal['err'] = 'imap.user.miss';
@@ -825,7 +840,7 @@ class identy_switch_prefs extends rcube_plugin
 			$retVal['err'] = 'imap.delim.miss';
 
 		// Check for overrides
-		if ($retVal['imap_host'] && strpos($retVal['imap_host'], '://'))
+		if ($retVal['imap_host'] && substr($retVal['imap_host'], 3, 3) == '://')
 		{
 			$retVal['imap_auth'] = strtolower(substr($retVal['imap_host'], 0, 3));
 			$retVal['imap_host'] = substr($retVal['imap_host'], 6);
@@ -848,12 +863,13 @@ class identy_switch_prefs extends rcube_plugin
 
 		if (!($retVal['smtp_host'] = self::get_field_value($iid, 'smtp_host')))
 			$retVal['err'] = 'smtp.host.miss';
+		$retVal['smtp_auth'] = self::get_field_value($iid, 'smtp_auth');
 		$retVal['smtp_port'] = self::get_field_value($iid, 'smtp_port');
 
 		// Check for overrides
 		if ($retVal['smtp_host'])
 		{
-			if (strpos($retVal['smtp_host'], '://'))
+			if (substr($retVal['smtp_host'], 3, 3) == '://')
 				$retVal['smtp_host'] = substr($retVal['smtp_host'], 6);
 			if ($p = strpos($retVal['smtp_host'], ':'))
 			{
@@ -867,8 +883,10 @@ class identy_switch_prefs extends rcube_plugin
 			$retVal['err'] = 'smtp.port.num';
 		elseif ($retVal['smtp_port'] < 1 || $retVal['smtp_port'] > 65535)
 			$retVal['err'] = 'smpt.port.range';
-		if (($retVal['smtp_auth'] = self::get_field_value($iid, 'smtp_auth')) == 'imap')
-			$retVal['flags'] |= self::SMTP_IMAP;
+		if ($retVal['smtp_auth'] == 'ssl')
+			$retVal['flags'] |= self::SMTP_SSL;
+		elseif ($retVal['smtp_auth'] == 'tls')
+			$retVal['flags'] |= self::SMTP_TLS;
 
 		// Check notification options
 		if (self::get_field_value($iid, 'notify_all_folder'))
@@ -911,7 +929,12 @@ class identy_switch_prefs extends rcube_plugin
 			elseif ($field == 'smtp_auth')
 			{
 				$rc = (int)self::get($iid, 'flags');
-				$rc = $rc & self::SMTP_IMAP ? 'imap' : '';
+				if ($rc & self::SMTP_SSL)
+					$rc = 'ssl';
+				elseif ($rc & self::SMTP_TLS)
+					$rc = 'tls';
+				else
+					$rc = '';
 			}
 			elseif ($field == 'notify_all_folder')
 			{

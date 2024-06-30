@@ -33,10 +33,7 @@ declare(strict_types=1);
  * 		smtp_port		SMTP port
  * 		notify_timeout	Notification timeout
  * 		newmail_check	New mail check interval
- * 		drafts			Draft folder name
- * 		sent			Sent folder name
- * 		junk			Junk folder name
- * 		trash			Trash folder name
+ * 		folders			Special folder name array
  * 		unseen			# of unseen messages
  * 		checked_last	Last time checked
  * 		notify			Notify user flag
@@ -128,9 +125,6 @@ class identy_switch extends identy_switch_prefs
 
 			$this->add_texts('localization');
 
-			// Add onclick() handler to make sure selection menu will be closed
-			#$args['content'] = str_replace('<body', '<body onclick="identy_switch_toggle_menu(true)" ', $args['content']);
-
 			// First call?
 			if (!self::get(null, 'iid'))
 			{
@@ -187,20 +181,28 @@ class identy_switch extends identy_switch_prefs
 									 '- substituting with "localhost"');
 					$host = 'localhost';
 				}
-				$p = 0;
 				if (substr($host, 3, 1) == ':')
 				{
-					self::set(-1, 'smtp_port', 465);
-					self::set(-1, 'flags', self::get(-1, 'flags') | self::SMTP_IMAP);
-					$host = substr($host, 6);
+					if (strtolower(substr($host, 0, 3)) == 'ssl')
+					{
+						self::set(-1, 'flags', self::get(-1, 'flags') | self::SMTP_SSL);
+						$host = substr($host, 3);
+						self::set(-1, 'smtp_port', 465);
+					}
+					elseif (strtolower(substr($host, 0, 3)) == 'tls')
+					{
+						self::set(-1, 'flags', self::get(-1, 'flags') | self::SMTP_TLS);
+						$host = substr($host, 3);
+						self::set(-1, 'smtp_port', 587);
+					}
+					if (($p = strpos($host, ':')) !== false)
+					{
+						self::set(-1, 'smtp_port', substr($host, $p + 1));
+						$host = substr($host, 0, $p);
+					}
 				} else
-					self::set(-1, 'smtp_port', 587);
-				if (($p = strpos($host, ':')) !== false)
-				{
-					self::set(-1, 'smtp_port', substr($host, $p + 1));
-					self::set(-1, 'smtp_host', substr($host, 0, $p));
-				} else
-					self::set(-1, 'smtp_host', $host);
+					self::set(-1, 'smtp_port', 25);
+				self::set(-1, 'smtp_host', $host);
 
 				$prefs = $rc->user->get_prefs();
 
@@ -222,9 +224,11 @@ class identy_switch extends identy_switch_prefs
 						  $rc->config->get('refresh_interval'));
 
 				// Swap special folder names
+				$box = [];
 				foreach (rcube_storage::$folder_types as $mbox)
-					self::set(-1, $mbox, isset($prefs[$mbox.'_mbox']) ? $prefs[$mbox.'_mbox'] : '');
-				if ($prefs['show_real_foldernames'] == 'true')
+					$box[$mbox] = isset($prefs[$mbox.'_mbox']) ? $prefs[$mbox.'_mbox'] : '';
+				self::set(-1, 'folders', $box);
+				if (isset($prefs['show_real_foldernames']) && $prefs['show_real_foldernames'] == 'true')
 					self::set(-1, 'flags', self::get(-1, 'flags') | self::SHOW_REAL_FOLDER);
 				self::set(-1, 'flags', self::get(-1, 'flags') | (isset($prefs['lock_special_folders']) &&
 				   $prefs['lock_special_folders'] == true ? self::LOCK_SPECIAL_FOLDER : 0));
@@ -234,7 +238,7 @@ class identy_switch extends identy_switch_prefs
 				self::set(-1, 'checked_last', 0);
 				self::set(-1, 'notify', false);
 
-				// Swap data of alternative accounts
+				// Swap data of alternate accounts
 				$sql = 'SELECT isw.* '.
 					   'FROM '.$rc->db->table_name(self::TABLE).' isw '.
 					   'INNER JOIN '.$rc->db->table_name('identities').' ii ON isw.iid=ii.identity_id '.
@@ -247,6 +251,8 @@ class identy_switch extends identy_switch_prefs
 					{
 						if ($k == 'id' || $k == 'user_id' || $k == 'iid')
 							continue;
+						if ($k == 'folders')
+							$v = json_decode($v);
 						self::set($r['iid'], $k, $v);
 					}
 					// Volatile variables
@@ -382,13 +388,11 @@ class identy_switch extends identy_switch_prefs
 		$rec = self::get(null, (string)self::get(null, 'iid'));
 
 		$args['smtp_user'] = $rec['imap_user'];
-        $args['smtp_pass'] = $rec['imap_pwd'] && ($rec['flags'] & self::SMTP_IMAP) ?
+        $args['smtp_pass'] = $rec['imap_pwd'] && ($rec['flags'] & (self::SMTP_SSL|self::SMTP_TLS)) ?
         					 $rc->decrypt($rec['imap_pwd']) : '';
 		$args['smtp_host'] = $rec['smtp_host'].':'.$rec['smtp_port'];
-		if (substr($args['smtp_host'], 4, 1) == ':')
-			$this->write_log('SMTP server already contains protocol, ignoring session security settings.');
-		elseif (($rec['flags'] & self::SMTP_IMAP) && $rec['flags'] & (self::IMAP_SSL|self::IMAP_TLS))
-			$args['smtp_host'] = ($rec['flags'] & self::IMAP_SSL ? 'ssl' : 'tls').'://'.$args['smtp_host'];
+		if ($rec['flags'] & (self::SMTP_SSL|self::SMTP_TLS))
+			$args['smtp_host'] = ($rec['flags'] & self::SMTP_SSL ? 'ssl' : 'tls').'://'.$args['smtp_host'];
 
 		return $args;
 	}
