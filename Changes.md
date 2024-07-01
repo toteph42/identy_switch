@@ -1,5 +1,9 @@
 # Changelog Ident switch plugin
 
+## Release 1.0.19
+
+- Fixed isse #14: Bug in composer.json
+
 ## Release 1.0.18
 
 - Fixed issue #8: CodeShakingSheep pull request merged to fix MySQL DB table creation for migration from ident_switch plugin
