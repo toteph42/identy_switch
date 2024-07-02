@@ -256,10 +256,10 @@ class identy_switch_prefs extends rcube_plugin
 			if (!in_array('check_all_folders', $no_override))
 			{
 				$set['check_all_folders'] = [];
-				$s 		 = &$set['check_all_folders'];
-				$s[$tit] = rcube::Q($this->gettext('idsw.notify.allfolder'));
-				$cb 	 = new html_checkbox([ 'name' => '_check_all_folder', 'value' => '1' ]);
-				$s[$val] = $cb->show($rec ? ($rec['flags'] & self::CHECK_ALLFOLDER ? '1' : '0') : '0');
+				$s 		 				  = &$set['check_all_folders'];
+				$s[$tit] 				  = rcube::Q($this->gettext('idsw.notify.allfolder'));
+				$cb 	 				  = new html_checkbox([ 'name' => '_check_all_folder', 'value' => '1' ]);
+				$s[$val] 				  = $cb->show($rec ? ($rec['flags'] & self::CHECK_ALLFOLDER ? '1' : '0') : '0');
 			}
 		} else {
 			$tit = 'title';
@@ -889,7 +889,7 @@ class identy_switch_prefs extends rcube_plugin
 			$retVal['flags'] |= self::SMTP_TLS;
 
 		// Check notification options
-		if (self::get_field_value($iid, 'notify_all_folder'))
+		if (self::get_field_value($iid, 'check_all_folder'))
 			$retVal['flags'] |= self::CHECK_ALLFOLDER;
 		if (self::get_field_value($iid, 'notify_basic'))
 			$retVal['flags'] |= self::NOTIFY_BASIC;

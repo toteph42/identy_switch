@@ -210,8 +210,9 @@ class identy_switch extends identy_switch_prefs
 				$p = 'newmail_notifier_';
 				if (isset($prefs['check_all_folders']) && $prefs['check_all_folders'])
 					self::set(-1, 'flags', self::get(-1, 'flags') | self::CHECK_ALLFOLDER);
-				foreach ([ 'basic' => self::NOTIFY_BASIC, 'desktop' => self::NOTIFY_DESKTOP,
- 		        		   'sound' => self::NOTIFY_SOUND] as $k => $v)
+				foreach ([ 'basic' 	 => self::NOTIFY_BASIC,
+						   'desktop' => self::NOTIFY_DESKTOP,
+ 		        		   'sound' 	 => self::NOTIFY_SOUND] as $k => $v)
 		        {
 		            if (isset($prefs[$p.$k]) && $prefs[$p.$k] == 1)
 						self::set(-1, 'flags', self::get(-1, 'flags') | $v);
@@ -353,8 +354,8 @@ class identy_switch extends identy_switch_prefs
 		// Set special folder
 		$prefs['show_real_foldernames'] = $rec['flags'] & self::SHOW_REAL_FOLDER ? true : false;
 		$prefs['lock_special_folders'] = $rec['flags'] & self::LOCK_SPECIAL_FOLDER ? true : false;
-		foreach (rcube_storage::$folder_types as $mbox)
-			$prefs[$mbox.'_mbox'] = $rec[$mbox];
+		foreach ($rec['folders'] as $k => $v)
+			$prefs[$k.'_mbox'] = $v;
 		$prefs['check_all_folders'] = $rec['flags'] & self::CHECK_ALLFOLDER ? '1' : '0';
 		$prefs['newmail_notifier_desktop_timeout'] = $rec['notify_timeout'];
 
@@ -525,7 +526,7 @@ class identy_switch extends identy_switch_prefs
 			    self::set('config', 'fp', $cfg['fp'] = new identy_switch_rpc());
 				if (is_string($cfg['fp']->open($host)))
 				{
-					$this->write_log('NewMail: error - '.$cfg['fp']);
+					$this->write_log('NewMail: Error - '.$cfg['fp']);
 					return $args;
 				}
 			}

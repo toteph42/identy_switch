@@ -92,7 +92,7 @@ class identy_switch_newmails extends identy_switch_rpc {
 				self::write_data('0##Number of retries exceeded for identity '.$iid);
 
 			// Delete cache data
-			@unlink($this->file);
+##			@unlink($this->file);
 			return;
 		} else {
 
@@ -124,11 +124,10 @@ class identy_switch_newmails extends identy_switch_rpc {
 			if ($rec['flags'] & identy_switch::CHECK_ALLFOLDER)
 				$folders += $storage->list_folders_subscribed('', '*'. null, null, true);
 
-		    // Drop exception folders (and their subfolders)
-		    foreach ($folders as $k => $chk)
-			    foreach (rcube_storage::$folder_types as $mbox)
-					if (isset($rec[$mbox]) && stripos($rec[$mbox], $chk) === 0)
-						unset($folders[$k]);
+			// Drop exception folders (and their subfolders)
+			foreach ($rec['folders'] as $val)
+		    	if (($k = array_search($val, $folders)) !== false)
+					unset($folders[$k]);
 
 			// Count unseen
 			$unseen = 0;

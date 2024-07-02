@@ -1,5 +1,10 @@
 # Changelog Ident switch plugin
 
+## Release 1.0.20
+
+- Fixed: Special folder handling
+- Fxied: "Check all folders" flag not accepted
+
 ## Release 1.0.19
 
 - Fixed isse #14: Bug in composer.json
