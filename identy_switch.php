@@ -187,7 +187,7 @@ class identy_switch extends identy_switch_prefs
 					if (strtolower(substr($host, 0, 3)) == 'ssl')
 					{
 						self::set(-1, 'flags', self::get(-1, 'flags') | self::SMTP_SSL);
-						$host = substr($host, 6);
+						$host = substr($host, 6); //
 						self::set(-1, 'smtp_port', 465);
 					}
 					elseif (strtolower(substr($host, 0, 3)) == 'tls')
