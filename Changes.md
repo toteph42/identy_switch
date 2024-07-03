@@ -1,5 +1,10 @@
 # Changelog Ident switch plugin
 
+## Release 1.0.22
+
+- Fixed: Bug in preferences (identy edit)
+- Fixed: Bug when trying to send mails with default identity
+
 ## Release 1.0.21
 
 - Fixed: Minor bug in refresh interval

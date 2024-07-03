@@ -432,7 +432,11 @@ class identy_switch_prefs extends rcube_plugin
 		}
 
 		$iid = isset($args['record']['identity_id']) ? $args['record']['identity_id'] : self::get(null, 'iid');
-        $rec = self::get($iid);
+        if (!($rec = self::get($iid)))
+        {
+        	$iid = self::get(null, 'iid');
+        	$rec = self::get($iid);
+        }
 
         if ($int)
 	        return [ 'refreshinterval' => [

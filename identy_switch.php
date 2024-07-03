@@ -187,15 +187,16 @@ class identy_switch extends identy_switch_prefs
 					if (strtolower(substr($host, 0, 3)) == 'ssl')
 					{
 						self::set(-1, 'flags', self::get(-1, 'flags') | self::SMTP_SSL);
-						$host = substr($host, 3);
+						$host = substr($host, 6);
 						self::set(-1, 'smtp_port', 465);
 					}
 					elseif (strtolower(substr($host, 0, 3)) == 'tls')
 					{
 						self::set(-1, 'flags', self::get(-1, 'flags') | self::SMTP_TLS);
-						$host = substr($host, 3);
+						$host = substr($host, 6);
 						self::set(-1, 'smtp_port', 587);
 					}
+					// Unknown protocoll
 					if (($p = strpos($host, ':')) !== false)
 					{
 						self::set(-1, 'smtp_port', substr($host, $p + 1));
