@@ -431,7 +431,7 @@ class identy_switch_prefs extends rcube_plugin
 			}
 		}
 
-		$iid = self::get(null, 'iid');
+		$iid = isset($args['record']['identity_id']) ? $args['record']['identity_id'] : self::get(null, 'iid');
         $rec = self::get($iid);
 
         if ($int)
@@ -462,8 +462,8 @@ class identy_switch_prefs extends rcube_plugin
 
         if (!empty($val = rcube_utils::get_input_value('_refresh_interval', rcube_utils::INPUT_POST)))
         {
-        	$args['prefs']['refresh_interval'] = $val;
-        	self::set($iid, 'newmail_check', $rec['newmail_check'] = $val);
+        	$args['prefs']['refresh_interval'] = $val * 60;
+        	self::set($iid, 'newmail_check', $rec['newmail_check'] = $val * 60);
         }
 
 		if ($iid != -1)
@@ -1083,6 +1083,17 @@ class identy_switch_prefs extends rcube_plugin
 	protected function write_log(string $txt): void
 	{
 		if (self::get('config', 'logging'))
+			rcmail::get_instance()->write_log('identy_switch', $txt);
+	}
+
+	/**
+	 * 	Write debug message
+	 *
+	 * 	@param string $txt 		Log message
+	 */
+	protected function debug_log(string $txt): void
+	{
+		if (self::get('config', 'debug'))
 			rcmail::get_instance()->write_log('identy_switch', $txt);
 	}
 

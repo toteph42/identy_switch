@@ -92,7 +92,7 @@ class identy_switch_newmails extends identy_switch_rpc {
 				self::write_data('0##Number of retries exceeded for identity '.$iid);
 
 			// Delete cache data
-##			@unlink($this->file);
+			@unlink($this->file);
 			return;
 		} else {
 

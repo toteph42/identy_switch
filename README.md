@@ -61,7 +61,7 @@ If you receive new mails, the number of new mails will be shown in identity sele
 
 There is a file `config.inc.php` in the plugin directory available. This file can be used to specify some configuration settings.
 
-If you want to change sound, icon or desktop icon, please checkout `alert.mp3`, `alert.wav`, `alert.ico` and `alert.gif` in sub-directory `assets`.
+If you want to change sound, icon or desktop icon, please checkout `alert.mp3`, `alert.ico` and `alert.gif` in sub-directory `assets`.
 
 ### Locking configuration ###
 

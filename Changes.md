@@ -1,5 +1,10 @@
 # Changelog Ident switch plugin
 
+## Release 1.0.21
+
+- Fixed: Minor bug in refresh interval
+- Added: Debug configuration option
+
 ## Release 1.0.20
 
 - Fixed: Special folder handling

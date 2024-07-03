@@ -14,6 +14,7 @@ declare(strict_types=1);
  *
  * 	config 				Configuration data
  * 		logging			Allow logging to 'logs/identy_switch.log'
+ * 		debug			Log debug message to 'logs/identy_switch.log'
  * 		check			Allow new mail checking
  * 		interval		Specify interval for checking of new mails
  * 		retries			Specify no. of retries for reading data from mail server
@@ -132,7 +133,7 @@ class identy_switch extends identy_switch_prefs
 				$this->load_config();
 				foreach ($rc->config->get('identy_switch.config', []) as $k => $v)
 				{
-					if ($k == 'logging')
+					if ($k == 'logging' || $k == 'debug')
 						self::set('config', $k, $v, false);
 					if ($k == 'check')
 						self::set('config', $k, $v, true);
@@ -334,9 +335,9 @@ class identy_switch extends identy_switch_prefs
 		$rec = self::get($iid);
 
 		if ($iid == -1)
-			$this->write_log('Switching mailbox back to default identity "'.$rec['imap_user'].'"');
+			$this->write_log('Switching back to default identity "'.$rec['imap_user'].'"');
 		else
-			$this->write_log('Switching mailbox to identity "'.$rec['imap_user'].'"');
+			$this->write_log('Switching to identity "'.$rec['imap_user'].'"');
 
 		$_SESSION['_name'] 				= $rec['label'];
 		$_SESSION['username'] 			= $rec['imap_user'];
@@ -472,11 +473,15 @@ class identy_switch extends identy_switch_prefs
 	 */
 	function check_newmails($args) {
 
+		self::debug_log('Starting newmail check "'.serialize($args).'"."');
+
 		$rc = rcmail::get_instance();
 
 		// Get configuration
 		if(!is_array($cfg = self::get('config')))
 			return $args;
+
+		self::debug_log('Configuration loaded "'.serialize($cfg).'".');
 
 		// First time call?
 		if (!isset($cfg['cache']))
@@ -489,7 +494,10 @@ class identy_switch extends identy_switch_prefs
 
 		// Feature disabled?
 		if (!$cfg['check'])
+		{
+			self::debug_log('New mail check disabled');
 			return $args;
+		}
 
 		// Only allow call under special conditions
 		if (!isset($args['action']) || $args['action'] != 'refresh')
@@ -497,6 +505,8 @@ class identy_switch extends identy_switch_prefs
 
 		// Make a copy of our cached data
 		$cache = self::get();
+
+		self::debug_log('Start new mail checking');
 
 		// Check if we're outside waiting window
 		$chk = 0;
@@ -510,6 +520,8 @@ class identy_switch extends identy_switch_prefs
 			else
 				unset($cache[$iid]);
 		}
+
+		self::debug_log('Check allowed for '.$chk.' accounts');
 
 		// Check for data file
 		$data_file = file_exists($cfg['data']);
@@ -526,9 +538,10 @@ class identy_switch extends identy_switch_prefs
 			    self::set('config', 'fp', $cfg['fp'] = new identy_switch_rpc());
 				if (is_string($cfg['fp']->open($host)))
 				{
-					$this->write_log('NewMail: Error - '.$cfg['fp']);
+					$this->write_log('NewMail: Error - '.$cfg['fp'].' for '.$host);
 					return $args;
 				}
+				self::debug_log('Host "'.$host.'" opened');
 			}
 
 			// Save data for background sharing
@@ -543,7 +556,10 @@ class identy_switch extends identy_switch_prefs
 				self::set('config', 'fp', $cfg['fp'] = 0);
 				return $args;
 			}
+			self::debug_log('Request "'.$req.'" placed');
 		}
+
+		self::debug_log('Data file '.($data_file ? 'exists.' : 'does not exist.'));
 
 		// Check for data file
 		if (!$data_file)
@@ -584,6 +600,8 @@ class identy_switch extends identy_switch_prefs
 				}
 				self::set($r[1], 'checked_last', $r[0]);
 			}
+
+			self::debug_log('Starting notification.');
 
 			self::do_notify();
 		}

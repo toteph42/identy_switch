@@ -46,5 +46,8 @@ $config['identy_switch.config'] = [
 
 	// Specify no. of retries for reading data from mail server. Default is 10 times.
 	'retries' => 10, 
+	
+	// Enable some debugging messges saved in log file. Default is false
+	'debug' => false,
 ];
 
