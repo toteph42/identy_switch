@@ -1,9 +1,21 @@
 # Changelog Ident switch plugin
 
-## Release 1.0.22
+## Release 1.0.25
+
+- French translation provided by @rglemaire
+
+## Release 1.0.24
 
 - Fixed: Bug in preferences (identy edit)
 - Fixed: Bug when trying to send mails with default identity
+
+## Release 1.0.23
+
+- Skipped
+
+## Release 1.0.22
+
+- Skipped
 
 ## Release 1.0.21
 
