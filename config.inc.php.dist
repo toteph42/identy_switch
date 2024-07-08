@@ -12,42 +12,55 @@ $config['identy_switch.config'] = [
  	// Appropriate set of values is searched by mapping domain of email (from identity) to array key.
 	
 	// Domain part of email address
+	// If you use '*' as wild card, the domain and tld of the identity is used 
 	'domain.tld' => [
 
-		// IMAP host name, use ssl:// or tls:// notation if needed, for no security use imap:// 
-		// (must always start with scheme).
-		// Required.
-		'imap' => 'imap://imap.domain.tld:143',
+		// IMAP host name, use ssl:// or tls:// notation if needed, for no security use imap:// (must always start with scheme). 
+		// - If you use '*' as wild card, the domain and tld of the identity is used 
+		// - Defaults to 'not specified'
+		'imap' => 'imap://imap.domain.tld:447',
+		
+		// Folder delimiter
+		// Defaults to 'not specified'
+		'delimiter' => '.',
 
 		// Login name, can be 'email' (full address from identity), 'mbox' (only mailbox part).
-		// Any other value is treated as 'not specified' (default).
+		// - Any other value is treated as 'not specified' (default).
 		'user' => 'email',
 
-		// SMTP host name, use ssl:// or tls:// notation if needed, for no security use imap:// 
-		// (must always start with scheme).
-		// Required.
-		'smtp' => 'imap://smtp.domain.tld:143',
+		// SMTP host name, use ssl:// or tls:// notation if needed, for no security use imap:// (must always start with scheme).
+		// - If you use '*' as wild card, the domain and tld of the identity is used 
+		// - Defaults to 'not specified'
+		'smtp' => 'imap://smtp.domain.tld:130',
 	],
 
-	'another.tld' => [
-		'imap' => 'tls://imap.another.tld',
-		'smtp' => 'tls://smtp.another.tld',
-		'user' => 'mbox',
-	],
+	// 'another.tld' => [
+	//		'imap' 		=> 'tls://imap.another.tld',
+	//		'smtp' 		=> 'tls://smtp.another.tld',
+	//		'user' 		=> 'mbox',
+	// ],
+
+	// Catch all (if you specify multiple 'catch all', then only first one is used)
+	//
+	// '*' => [
+	//		'imap' 		=> 'ssl://imap.*',
+	//		'smtp' 		=> 'tls://smtp.*',
+	//		'delimiter' => '/',
+	//	],
 
 	// Allow logging to 'logs/identy_switch.log'. Default is false.
-	'logging' => false,
+	'logging'	=> false,
 
 	// Allow new mail checking. Default is true.
-	'check' => true,
+	'check' 	=> true,
 
 	// Specify interval for checking of new mails. Default is 5 min. (5 * 60 sec.)
-	'interval' => 300, 
+	'interval' 	=> 300, 
 
 	// Specify no. of retries for reading data from mail server. Default is 10 times.
-	'retries' => 10, 
+	'retries' 	=> 10, 
 	
 	// Enable some debugging messges saved in log file. Default is false
-	'debug' => false,
+	'debug' 	=> false,
 ];
 

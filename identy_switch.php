@@ -29,6 +29,7 @@ declare(strict_types=1);
  * 		imap_user		IMAP user
  * 		imap_pwd		IMAP password
  * 		imap_host		IMAP host
+ * 		imap_delim		Folder delimiter
  * 		imap_port		IMAP port
  * 		smtp_host		SMTP host
  * 		smtp_port		SMTP port

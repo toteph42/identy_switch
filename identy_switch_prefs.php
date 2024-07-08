@@ -503,7 +503,7 @@ class identy_switch_prefs extends rcube_plugin
 		if ($email && strcasecmp($email, $rc->user->data['username']) === 0)
 			return $args;
 
-		// Apply definitions from identy_switch/config.inc.php
+		// Apply configuration from identy_switch/config.inc.php
 		if (is_array($cfg = $this->get_config($email)))
 		{
 			if (isset($args['record']['identity_id']))
@@ -511,23 +511,6 @@ class identy_switch_prefs extends rcube_plugin
 				$iid = (int)$args['record']['identity_id'];
 
 				self::write_log('Applying predefined configuration for "'.$email.'".');
-
-				// Parse and set host and related information
-				$url = parse_url($cfg['imap']);
-				self::set($iid, 'imap_host', isset($url['host']) ? rcube::Q($url['host'], 'url') : '');
-				self::set($iid, 'imap_port', isset($url['port']) ? intval($url['port']) : '');
-				if (strcasecmp('tls', $url['scheme']) === 0)
-					self::set($iid, 'flags', (int)self::get($iid, 'flags') | self::IMAP_TLS);
-				if (strcasecmp('ssl', $url['scheme']) === 0)
-					self::set($iid, 'flags', (int)self::get($iid, 'flags') | self::IMAP_SSL);
-
-				$url = parse_url($cfg['smtp']);
-				self::set($iid, 'smtp_host', isset($url['host']) ? rcube::Q($url['host'], 'url') : '');
-				self::set($iid, 'smtp_port', isset($url['port']) ? intval($url['port']) : '');
-				if (strcasecmp('tls', $url['scheme']) === 0)
-					self::set($iid, 'flags', (int)self::get($iid, 'flags') | self::SMTP_TLS);
-				if (strcasecmp('ssl', $url['scheme']) === 0)
-					self::set($iid, 'flags', (int)self::get($iid, 'flags') | self::SMTP_SSL);
 
 				// Set up user name
 				if ($cfg['user'])
@@ -545,6 +528,29 @@ class identy_switch_prefs extends rcube_plugin
 						break;
 					}
 				}
+				// Check for wild card
+				if (strpos($cfg['imap'], '*'))
+					$cfg['imap'] = str_replace('*', substr($email, strpos($email, '@') + 1), $cfg['imap']);
+				if (strpos($cfg['smtp'], '*'))
+					$cfg['smtp'] = str_replace('*', substr($email, strpos($email, '@') + 1), $cfg['smtp']);
+
+				// Parse and set host and related information
+				$url = parse_url($cfg['imap']);
+				self::set($iid, 'imap_host', isset($url['host']) ? rcube::Q($url['host'], 'url') : '');
+				self::set($iid, 'imap_port', isset($url['port']) ? intval($url['port']) : '');
+				if (strcasecmp('tls', $url['scheme']) === 0)
+					self::set($iid, 'flags', (int)self::get($iid, 'flags') | self::IMAP_TLS);
+				if (strcasecmp('ssl', $url['scheme']) === 0)
+					self::set($iid, 'flags', (int)self::get($iid, 'flags') | self::IMAP_SSL);
+				self::set($iid, 'imap_delim', $cfg['delimiter']);
+
+				$url = parse_url($cfg['smtp']);
+				self::set($iid, 'smtp_host', isset($url['host']) ? rcube::Q($url['host'], 'url') : '');
+				self::set($iid, 'smtp_port', isset($url['port']) ? intval($url['port']) : '');
+				if (strcasecmp('tls', $url['scheme']) === 0)
+					self::set($iid, 'flags', (int)self::get($iid, 'flags') | self::SMTP_TLS);
+				if (strcasecmp('ssl', $url['scheme']) === 0)
+					self::set($iid, 'flags', (int)self::get($iid, 'flags') | self::SMTP_SSL);
 			}
 		}
 
@@ -990,6 +996,7 @@ class identy_switch_prefs extends rcube_plugin
 	 */
 	private function get_config(string $email): bool|array
 	{
+		// Get domain of identity
 		if (!($p = strstr($email, '@')) || !($dom = substr($p, 1)))
 			return false;
 
@@ -997,14 +1004,8 @@ class identy_switch_prefs extends rcube_plugin
 		$this->load_config();
 
 		$cfg = rcmail::get_instance()->config->get('identy_switch.config', []);
-		if ($cfg = isset($cfg[$dom]) ? $cfg[$dom] : false)
-		{
-			// Host must be specified!
-			if (!$cfg['imap'])
-				return false;
-		}
 
-		return $cfg;
+		return isset($cfg[$dom]) ? $cfg[$dom] : (isset($cfg['*']) ? $cfg['*'] : false);
 	}
 
 	/**

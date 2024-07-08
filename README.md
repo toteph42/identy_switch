@@ -27,6 +27,7 @@ This plugin allows users to switch between different accounts in a single Roundc
     * **Port** - Port on server to connect to. If left blank 143 will be used.
     * **Username** - Login used *for IMAP and SMTP servers*.
     * **Password** - Password used *for IMAP and SMTP servers*. It's stored encrypted in database.
+    * **Delimiter** - IMAP folder delimiter.
 * **SMTP**
     * **Server host name** - Host name for imap server. If left blank 'localhost' will be used.
     * **Encryption** - Connection security (None, SSL or TLS).

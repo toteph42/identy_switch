@@ -1,5 +1,11 @@
 # Changelog Ident switch plugin
 
+## Release 1.0.26
+
+- Added: IMAP folder delimiter configuration parameter
+- Added: Wildcard for domain in configuration parameter
+- Fixed: Typo in README.md
+
 ## Release 1.0.25
 
 - French translation provided by @rglemaire
