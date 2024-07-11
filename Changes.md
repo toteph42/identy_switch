@@ -1,5 +1,10 @@
 # Changelog Ident switch plugin
 
+## Release 1.0.27
+
+- Fixed: 'interval' not loaded when creating new identity
+- Fixed: Some config.php.dist parameter not set as default for identity
+
 ## Release 1.0.26
 
 - Added: IMAP folder delimiter configuration parameter

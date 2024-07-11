@@ -221,11 +221,11 @@ class identy_switch_prefs extends rcube_plugin
 	 * 	@param bool $flag
 	 * 	@return array
 	 */
-	function get_notify_form(array $args, bool $int = false): array
+	function get_notify_form(array $args, bool $int_call = false): array
 	{
 		if (!self::get('config', 'check'))
 		{
-			if (!$int)
+			if (!$int_call)
 				unset($args['blocks']['new_message']['options']['check_all_folders']);
 			return $args;
 		}
@@ -235,7 +235,7 @@ class identy_switch_prefs extends rcube_plugin
 
         $rc = rcmail::get_instance();
 
-		if ($int)
+		if ($int_call)
 		{
 			$args['form']['notify'] = [];
 			$set = &$args['form']['notify'];
@@ -248,7 +248,7 @@ class identy_switch_prefs extends rcube_plugin
 		// Check that configuration is not disabled
 		$no_override = (array) $rc->config->get('dont_override');
 
-		if ($int)
+		if ($int_call)
 		{
 			$tit = 'label';
 			$val = 'value';
@@ -332,7 +332,7 @@ class identy_switch_prefs extends rcube_plugin
 			}
 		}
 
-		return $int ? $set + $this->get_general_form($args, true) : $args;
+		return $int_call ? $set + $this->get_general_form($args, true) : $args;
 	}
 
 	/**
@@ -398,11 +398,11 @@ class identy_switch_prefs extends rcube_plugin
 	 * 	@param bool $flag
 	 * 	@return array
 	 */
-	private function get_general_form(array $args, bool $int = false): array
+	private function get_general_form(array $args, bool $int_call = false): array
 	{
 		if (!self::get('config', 'check'))
 		{
-			if (!$int)
+			if (!$int_call)
 				unset($args['blocks']['main']['options']['refresh_interval']);
 			return $args;
 		}
@@ -438,7 +438,7 @@ class identy_switch_prefs extends rcube_plugin
         	$rec = self::get($iid);
         }
 
-        if ($int)
+        if ($int_call)
 	        return [ 'refreshinterval' => [
         									'type' => 'select',
 									  		'value' => $sel->show($rec['newmail_check'] / 60),
@@ -543,6 +543,7 @@ class identy_switch_prefs extends rcube_plugin
 				if (strcasecmp('ssl', $url['scheme']) === 0)
 					self::set($iid, 'flags', (int)self::get($iid, 'flags') | self::IMAP_SSL);
 				self::set($iid, 'imap_delim', $cfg['delimiter']);
+				self::set($iid, 'newmail_check', $cfg['interval']);
 
 				$url = parse_url($cfg['smtp']);
 				self::set($iid, 'smtp_host', isset($url['host']) ? rcube::Q($url['host'], 'url') : '');
@@ -1005,7 +1006,19 @@ class identy_switch_prefs extends rcube_plugin
 
 		$cfg = rcmail::get_instance()->config->get('identy_switch.config', []);
 
-		return isset($cfg[$dom]) ? $cfg[$dom] : (isset($cfg['*']) ? $cfg['*'] : false);
+		if (!isset($cfg[$dom]) && !isset($cfg['*']))
+			return false;
+
+		if (!isset($cfg[$dom]) && isset($cfg['*']))
+			$dom = '*';
+
+		$cfg[$dom]['logging'] 	= $cfg['logging'];
+		$cfg[$dom]['check'] 	= $cfg['check'];
+		$cfg[$dom]['interval'] 	= $cfg['interval'];
+		$cfg[$dom]['retries'] 	= $cfg['retries'];
+		$cfg[$dom]['debug'] 	= $cfg['debug'];
+
+		return $cfg[$dom];
 	}
 
 	/**
