@@ -1,5 +1,14 @@
 # Changelog Ident switch plugin
 
+## Release 1.0.29
+
+- Fixed: Loop error in ident_switch_newmail.php
+- Fixed: Usage of special characters '%' for SMTP hosts in config/config.inc.php
+
+## Release 1.0.28
+
+- Added: Mentioning limitiations in READNE.md
+ 
 ## Release 1.0.27
 
 - Fixed: 'interval' not loaded when creating new identity

@@ -183,6 +183,9 @@ class identy_switch extends identy_switch_prefs
 									 '- substituting with "localhost"');
 					$host = 'localhost';
 				}
+				// Parse hoost name for special characters
+				$host = rcube_utils::parse_host($host);
+
 				if (substr($host, 3, 1) == ':')
 				{
 					if (strtolower(substr($host, 0, 3)) == 'ssl')

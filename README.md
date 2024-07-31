@@ -88,6 +88,11 @@ If you've installed the `ident_switch` plugin, there is a migration file availab
 
 * Versions 1.x - for Roundcube v1.6. Requires PHP version >= 8.0.0.
 
+### Limitations ###
+
+This plugin only supports `Classic`, `Elatic` and `Larry` skin. If you wan't to get another skin to be supoorted, then please 
+contact me. 
+
 ### License ###
 
 This plugin is released under the [GNU General Public License v3.0](./LICENSE).
