@@ -90,7 +90,7 @@ If you've installed the `ident_switch` plugin, there is a migration file availab
 
 ### Limitations ###
 
-This plugin only supports `Classic`, `Elatic` and `Larry` skin. If you wan't to get another skin to be supoorted, then please 
+This plugin only supports `Classic`, `Elatic`, `Larry` and `Hivemail` skin. If you wan't to get another skin to be supoorted, then please 
 contact me. 
 
 ### License ###
@@ -103,4 +103,4 @@ If you like this software and you want support my work, feel free to send me a d
 
 <a href="https://www.paypal.com/donate/?hosted_button_id=DS6VK49NAFHEQ" target="_blank" rel="noopener">   <img src="https://www.paypalobjects.com/en_US/DK/i/btn/btn_donateCC_LG.gif" alt="Donate with PayPal"/> </a>
 
-[[List of all changes](./Changes.md)] 
+[[List of changes](./Changes.md)] 

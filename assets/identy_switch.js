@@ -19,6 +19,7 @@ $(function() {
 		break;
 
     case 'elastic':
+	case 'hivemail':
         isOk = identy_switch_addCbElastic($sw);
     
     default:

@@ -2,12 +2,13 @@
 
 ## Release 1.0.29
 
+- Added: Support for "hievmail" skin
 - Fixed: Loop error in ident_switch_newmail.php
 - Fixed: Usage of special characters '%' for SMTP hosts in config/config.inc.php
 
 ## Release 1.0.28
 
-- Added: Mentioning limitiations in READNE.md
+- Added: Mentioning limitiations in README.md
  
 ## Release 1.0.27
 
