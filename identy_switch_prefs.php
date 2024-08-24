@@ -14,7 +14,7 @@ class identy_switch_prefs extends rcube_plugin
 
 	const TABLE = 'identy_switch';
 
-	// Flags user in database
+	// User flags in database
 	const ENABLED		    	= 0x0001;
 	const IMAP_SSL				= 0x0004;
 	const IMAP_TLS				= 0x0008;
@@ -1060,7 +1060,7 @@ class identy_switch_prefs extends rcube_plugin
 	 * 	@param string $var
 	 * 	@return mixed
 	 */
-	protected function get(string|int $sect = null, string $var = null): mixed
+	static public function get(string|int $sect = null, string $var = null): mixed
 	{
 		if (!$sect && !$var)
 		{
@@ -1097,21 +1097,14 @@ class identy_switch_prefs extends rcube_plugin
 	 * 	Write log message
 	 *
 	 * 	@param string $txt 		Log message
+	 * 	@param bool   $debug 	TRUE=Is debug message; FALSE=regular message (default)
 	 */
-	protected function write_log(string $txt): void
+	static public function write_log(string $txt, bool $debug = false): void
 	{
-		if (self::get('config', 'logging'))
+		if (!$debug && self::get('config', 'logging'))
 			rcmail::get_instance()->write_log('identy_switch', $txt);
-	}
 
-	/**
-	 * 	Write debug message
-	 *
-	 * 	@param string $txt 		Log message
-	 */
-	protected function debug_log(string $txt): void
-	{
-		if (self::get('config', 'debug'))
+		if ($debug && self::get('config', 'debug'))
 			rcmail::get_instance()->write_log('identy_switch', $txt);
 	}
 

@@ -1,5 +1,10 @@
 # Changelog Ident switch plugin
 
+## Release 1.0.30
+
+- Added: Debug support extended
+- Added: New mail check now waiting for data file
+
 ## Release 1.0.29
 
 - Added: Support for "hievmail" skin

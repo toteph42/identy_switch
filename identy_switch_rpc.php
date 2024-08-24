@@ -8,9 +8,9 @@ declare(strict_types=1);
  * 	@license 	LGPL-3.0-or-later
  */
 
-class identy_switch_rpc {
+class identy_switch_rpc  {
 
-    private $host	= null;
+	private $host	= null;
     private $req	= null;
     private $fp		= null;
 

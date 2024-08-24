@@ -13,6 +13,7 @@ if (!defined('INSTALL_PATH'))
 	define('INSTALL_PATH', $_SERVER['DOCUMENT_ROOT'].'/');
 require_once INSTALL_PATH.'program/include/iniset.php';
 require_once INSTALL_PATH.'plugins/identy_switch/identy_switch_rpc.php';
+require_once INSTALL_PATH.'plugins/identy_switch/identy_switch_prefs.php';
 
 class identy_switch_newmails extends identy_switch_rpc {
 
@@ -27,20 +28,28 @@ class identy_switch_newmails extends identy_switch_rpc {
     {
 		$rc = rcmail::get_instance();
 
+		// Get Identity id
 		if (is_null($iid = rcube_utils::get_input_value('iid', rcube_utils::INPUT_GET)))
-			return;
-		if (is_null($this->file = rcube_utils::get_input_value('cache', rcube_utils::INPUT_GET)))
 		{
-			rcmail::get_instance()->write_log('identy_switch', 'Cannot get cache file name');
+			identy_switch_prefs::write_log('Cannot load identity id - stop checking', true);
 			return;
 		}
+
+		// Get cache file name
+		if (is_null($this->file = rcube_utils::get_input_value('cache', rcube_utils::INPUT_GET)))
+		{
+			identy_switch_prefs::write_log('Cannot get cache file name - stop checking');
+			return;
+		} else
+			identy_switch_prefs::write_log('Cache file name "'.$this->file.'"', true);
 
 		// Get cached data
 		if (!file_exists($this->file))
 		{
-			rcmail::get_instance()->write_log('identy_switch', 'Cache file "'.$this->file.'" does not exists');
+			identy_switch_prefs::write_log('Cache file "'.$this->file.'" does not exists - stop checking');
 			return;
-		}
+		} else
+			identy_switch_prefs::write_log('Cache file loaded', true);
 
 		// Storage initialization hook
 		$rc->plugins->register_hook('storage_init', [ $this, 'set_language' ]);
@@ -61,6 +70,7 @@ class identy_switch_newmails extends identy_switch_rpc {
 				if (!$res[$iid]->open($host))
 				{
 					self::write_data($iid.'##'.$res[$iid]);
+					identy_switch_prefs::write_log('Cannot open host "'.$host.'" - stop checking', true);
 					return;
 				}
 
@@ -70,7 +80,7 @@ class identy_switch_newmails extends identy_switch_rpc {
 				if (!$res[$iid]->write($req))
 				{
 					fclose($res[$iid]);
-					self::write_data('0##Identity: '.$iid.' Cannot write to "'.$host.'" Request: "'.$req.'"');
+					self::write_data('0##Identity: '.$iid.' Cannot write to "'.$host.'" Request: "'.$req.'" - stop checking');
 					return;
 				}
 			}
@@ -89,10 +99,12 @@ class identy_switch_newmails extends identy_switch_rpc {
 				$obj; // Disable Eclipse warning
 			}
 			if ($cnt >= $this->cache['config']['retries'])
-				self::write_data('0##Number of retries exceeded for identity '.$iid);
+				self::write_data('0##Number of retries exceeded for identity '.$iid.' - stop checking');
 
 			// Delete cache data
 			@unlink($this->file);
+			identy_switch_prefs::write_log('Cache file "'.$this->file.'" deleted', true);
+
 			return;
 		} else {
 
@@ -114,7 +126,7 @@ class identy_switch_newmails extends identy_switch_rpc {
 			{
 				self::write_data('0##Identity '.$iid.': Cannot connect to "'.($rec['imap_enc'] ?
 								 $rec['imap_enc'].'://' : '').$rec['imap_host'].':'.$rec['imap_port'].
-								 '" for user "'.$rec['imap_user'].'"');
+								 '" for user "'.$rec['imap_user'].'" - stop checking');
 				return;
 			}
 
@@ -143,6 +155,8 @@ class identy_switch_newmails extends identy_switch_rpc {
 	       	$storage->close();
 
 	       	self::write_data($iid.'##'.$unseen);
+			identy_switch_prefs::write_log('Setting unseen '.$unseen.' for identity id '.$iid, true);
+
 	       	return;
 		}
     }
@@ -176,8 +190,7 @@ class identy_switch_newmails extends identy_switch_rpc {
 			// Open output file
 			if (!($this->fp = @fopen($this->cache['config']['data'], 'a')))
 			{
-				rcmail::get_instance()->write_log('identy_switch',
-							'Error opening file "'.$this->cache['config']['data'].'"');
+				identy_switch_prefs::write_log('Error opening data file "'.$this->cache['config']['data'].'"');
 				return false;
 			}
 			return fwrite($this->fp, time().'##'.$msg.'###') !== false ? true : false;

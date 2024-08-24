@@ -478,15 +478,11 @@ class identy_switch extends identy_switch_prefs
 	 */
 	function check_newmails($args) {
 
-		self::debug_log('Starting newmail check "'.serialize($args).'"."');
-
 		$rc = rcmail::get_instance();
 
 		// Get configuration
 		if(!is_array($cfg = self::get('config')))
 			return $args;
-
-		self::debug_log('Configuration loaded "'.serialize($cfg).'".');
 
 		// First time call?
 		if (!isset($cfg['cache']))
@@ -500,18 +496,19 @@ class identy_switch extends identy_switch_prefs
 		// Feature disabled?
 		if (!$cfg['check'])
 		{
-			self::debug_log('New mail check disabled');
+			self::write_log('New mail check disabled - stop checking', true);
 			return $args;
 		}
 
 		// Only allow call under special conditions
-		if (!isset($args['action']) || $args['action'] != 'refresh')
+		if (!isset($args['action']) || ($args['action'] != 'refresh' && $args['action'] != 'getunread'))
 			return $args;
+
+		self::write_log('Starting new mail check with arguments "'.serialize($args).'"."', true);
+		self::write_log('Configuration loaded "'.serialize($cfg).'".', true);
 
 		// Make a copy of our cached data
 		$cache = self::get();
-
-		self::debug_log('Start new mail checking');
 
 		// Check if we're outside waiting window
 		$chk = 0;
@@ -526,13 +523,15 @@ class identy_switch extends identy_switch_prefs
 				unset($cache[$iid]);
 		}
 
-		self::debug_log('Check allowed for '.$chk.' accounts');
+		if (!$chk)
+		{
+			if (!$chk)
+				self::write_log('No accounts to check - stop checking', true);
 
-		// Check for data file
-		$data_file = file_exists($cfg['data']);
-
-		if (!$chk && !$data_file)
 			return $args;
+		}
+
+		self::write_log('Check allowed for '.$chk.' account(s)', true);
 
 		if ($chk && !file_exists($cfg['cache']))
 		{
@@ -543,34 +542,47 @@ class identy_switch extends identy_switch_prefs
 			    self::set('config', 'fp', $cfg['fp'] = new identy_switch_rpc());
 				if (is_string($cfg['fp']->open($host)))
 				{
-					$this->write_log('NewMail: Error - '.$cfg['fp'].' for '.$host);
+					$this->write_log('New mail chking error - '.$cfg['fp'].' for '.$host.' - stop checking');
 					return $args;
 				}
-				self::debug_log('Host "'.$host.'" opened');
+				self::write_log('Host "'.$host.'" opened', true);
 			}
 
 			// Save data for background sharing
 			file_put_contents($cfg['cache'], serialize($cache));
 
+			self::write_log('Cache file "'.$cfg['cache'].'" created');
+
     		// Prepare request (no fopen() usage because "allow_url_fopen=FALSE" may be set in PHP.INI)
 			$req = '/plugins/identy_switch/identy_switch_newmails.php?iid=0&cache='.urlencode($cfg['cache']);
 			if (!$cfg['fp']->write($req))
 			{
-				$this->write_log('NewMail: Cannot write to "'.$host.'" Request: "'.$req.'"');
 				fclose($cfg['fp']);
 				self::set('config', 'fp', $cfg['fp'] = 0);
+				$this->write_log('Cannot write to "'.$host.'" Request: "'.$req.'" - stop checking');
 				return $args;
 			}
-			self::debug_log('Request "'.$req.'" placed');
+			self::write_log('Starting request "'.$req.'"', true);
 		}
 
-		self::debug_log('Data file '.($data_file ? 'exists.' : 'does not exist.'));
+		// Check for data file
+		$n = 0;
+		while (!($data_file = file_exists($cfg['data'])))
+		{
+			if ($n++ > 60)
+				break;
+			sleep (1);
+		}
 
 		// Check for data file
 		if (!$data_file)
+		{
+			self::write_log('No data file exist - stop checking', true);
 			return $args;
+		}
 
 		// Load data file
+		self::write_log('Loading and deleting data file', true);
 		$wrk = file_get_contents($cfg['data']);
 		@unlink($cfg['data']);
 
@@ -606,7 +618,7 @@ class identy_switch extends identy_switch_prefs
 				self::set($r[1], 'checked_last', $r[0]);
 			}
 
-			self::debug_log('Starting notification.');
+			self::write_log('Starting notification.', true);
 
 			self::do_notify();
 		}
