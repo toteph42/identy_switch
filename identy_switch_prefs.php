@@ -307,7 +307,7 @@ class identy_switch_prefs extends rcube_plugin
 												   'onclick' => 'identy_switch_desktop(\''.
 													   	rawurlencode($this->gettext('notify.title')).'\',\''.
 													   	rawurlencode(sprintf($this->gettext('notify.msg'), 1,
-													   	($rec ? $rec['imap_host'] : 'host'))).
+													   	($rec ? $rec['label'] : 'identity label'))).
 													   	'\',\''.($rec ? $rec['notify_timeout'] : '10').'\',\''.
 													   	rawurlencode($this->gettext('notify.err.notification')).
 													   	'\'); return false',

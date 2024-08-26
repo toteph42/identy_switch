@@ -209,15 +209,15 @@ function identy_switch_basic()
 function identy_switch_desktop(title, msg, timeout, errmsg)
 {
 	if (!('Notification' in window) || window.Notification.permission !== "granted") {
-		alert(decodeURI(errmsg));
+		alert(decodeURIComponent(errmsg));
 		window.Notification.requestPermission();
 		return;
 	}
 		 
-    var popup = new window.Notification(decodeURI(title), {
+    var popup = new window.Notification(decodeURIComponent(title), {
                 dir: "auto",
                 lang: "",
-                body: decodeURI(msg),
+                body: decodeURIComponent(msg),
                 icon: rcmail.assets_path('plugins/identy_switch/assets/alert.gif')
             });
 	popup.onclick = function() { this.close(); };
@@ -229,13 +229,13 @@ function identy_switch_sound(errmsg) {
     var src = rcmail.assets_path('plugins/identy_switch/assets/alert');
 
 	if (!('Notification' in window) || window.Notification.silent) {
-		alert(decodeURI(errmsg));
+		alert(decodeURIComponent(errmsg));
 		return;
 	}
 		 
 	if (!('Navigator' in window) && window.Navigator.getAutoplayPolicy &&
 		window.Navigator.getAutoplayPolicy('mediaelement') != 'allowed') {
-		alert(decodeURI(errmsg));
+		alert(decodeURIComponent(errmsg));
 		window.Notification.requestPermission();
 		return;
 	}

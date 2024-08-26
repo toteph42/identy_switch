@@ -1,5 +1,9 @@
 # Changelog Ident switch plugin
 
+## Release 1.0.31
+
+- Fixed: Hostname instead of identity label in desktop test notification shown
+
 ## Release 1.0.30
 
 - Added: Debug support extended
