@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS identy_switch(
     label VARCHAR(32),
     flags INTEGER NOT NULL DEFAULT 0,
     imap_user VARCHAR(64),
-    imap_pwd VARCHAR(64),
+    imap_pwd VARCHAR(128),
     imap_host VARCHAR(64),
     imap_port SMALLINT DEFAULT 0,
     imap_delim CHAR(1),
