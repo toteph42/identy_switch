@@ -1,5 +1,9 @@
 # Changelog Ident switch plugin
 
+## Release 1.0.32
+
+- Changed: "imap_pwd" now 128 bytes long
+
 ## Release 1.0.31
 
 - Fixed: Hostname instead of identity label in desktop test notification shown
