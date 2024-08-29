@@ -360,8 +360,9 @@ class identy_switch extends identy_switch_prefs
 		// Set special folder
 		$prefs['show_real_foldernames'] = $rec['flags'] & self::SHOW_REAL_FOLDER ? true : false;
 		$prefs['lock_special_folders'] = $rec['flags'] & self::LOCK_SPECIAL_FOLDER ? true : false;
-		foreach ($rec['folders'] as $k => $v)
-			$prefs[$k.'_mbox'] = $v;
+		if (is_array($rec['folders']))
+			foreach ($rec['folders'] as $k => $v)
+				$prefs[$k.'_mbox'] = $v;
 		$prefs['check_all_folders'] = $rec['flags'] & self::CHECK_ALLFOLDER ? '1' : '0';
 		$prefs['newmail_notifier_desktop_timeout'] = $rec['notify_timeout'];
 

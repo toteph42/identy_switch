@@ -1,5 +1,9 @@
 # Changelog Ident switch plugin
 
+## Release 1.0.33
+
+- Fixed: PHP Warning in identy_switch.php:363
+
 ## Release 1.0.32
 
 - Changed: "imap_pwd" now 128 bytes long
