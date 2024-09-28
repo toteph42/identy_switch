@@ -1,5 +1,10 @@
 # Changelog Ident switch plugin
 
+## Release 1.0.34
+
+- Added: Some more comments in config.inc.php.dist
+- Fixed: In some cases "special folders" were empty. Fix will handle.
+
 ## Release 1.0.33
 
 - Fixed: PHP Warning in identy_switch.php:363

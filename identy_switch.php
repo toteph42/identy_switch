@@ -259,7 +259,7 @@ class identy_switch extends identy_switch_prefs
 						if ($k == 'id' || $k == 'user_id' || $k == 'iid')
 							continue;
 						if ($k == 'folders')
-							$v = json_decode($v);
+							$v = is_null($v) ? [] : json_decode($v);
 						self::set($r['iid'], $k, $v);
 					}
 					// Volatile variables

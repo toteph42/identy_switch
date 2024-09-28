@@ -10,14 +10,20 @@ $config['identy_switch.config'] = [
 
 	// Preconfigured settings for different mail domains.
  	// Appropriate set of values is searched by mapping domain of email (from identity) to array key.
+ 	
+ 	// Please note:
+ 	// - Using config.inc.php is only done, when you enter identy_switch configuration panel!
+ 	// - On Startup of RoundCube all configuration parameters were loaded from data base, so changes to this
+ 	//   configuration file does not apply.
 	
 	// Domain part of email address
 	// If you use '*' as wild card, the domain and tld of the identity is used 
 	'domain.tld' => [
 
-		// IMAP host name, use ssl:// or tls:// notation if needed, for no security use imap:// (must always start with scheme). 
-		// - If you use '*' as wild card, the domain and tld of the identity is used 
-		// - Defaults to 'not specified'
+		// IMAP host name, use ssl:// or tls:// notation if needed, for no security use imap:// 
+		// Must always start with scheme. 
+		// If you use '*' as wild card, the domain and tld of the identity is used 
+		// Defaults to 'not specified'
 		'imap' => 'imap://imap.domain.tld:447',
 		
 		// Folder delimiter
@@ -25,12 +31,13 @@ $config['identy_switch.config'] = [
 		'delimiter' => '.',
 
 		// Login name, can be 'email' (full address from identity), 'mbox' (only mailbox part).
-		// - Any other value is treated as 'not specified' (default).
+		// Any other value is treated as 'not specified' (default).
 		'user' => 'email',
 
-		// SMTP host name, use ssl:// or tls:// notation if needed, for no security use imap:// (must always start with scheme).
-		// - If you use '*' as wild card, the domain and tld of the identity is used 
-		// - Defaults to 'not specified'
+		// SMTP host name, use ssl:// or tls:// notation if needed, for no security use imap:// 
+		// Must always start with scheme.
+		// If you use '*' as wild card, the domain and tld of the identity is used 
+		// Defaults to 'not specified'
 		'smtp' => 'imap://smtp.domain.tld:130',
 	],
 
