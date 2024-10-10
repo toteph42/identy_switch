@@ -78,14 +78,11 @@ function identy_switch_addCbClassic($sw) {
 	if ($taskBar.length > 0) {
 		$taskBar.prepend($sw);
 		// Move our selection menu a bit to the right
-		$('#identy_switch_menu').css('margin-left', '100px')
-			.css('margin-top', '32px')
-			.css('padding-top', '4px')
-			.css('padding-bottom', '4px');
+		$('#identy_switch_menu').css('left', '-10px')
+			.css('top', '-5px');
 		$('#identy_switch_dropdown')
-			.css('left', 'inherit')
-			.css('margin-left', '295px')
-			.css('margin-top', '30px');
+			.css('left', '190px')
+			.css('top', '-40px');
 	
 		return true;
 	}

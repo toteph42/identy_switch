@@ -1,5 +1,10 @@
 # Changelog Ident switch plugin
 
+## Release 1.0.35
+
+- Fixed: INSTALL_PATH in identity_switch_newmails.php
+- Changed: Position of dropdown in classic skin
+
 ## Release 1.0.34
 
 - Added: Some more comments in config.inc.php.dist
