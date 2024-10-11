@@ -1,5 +1,9 @@
 # Changelog Ident switch plugin
 
+## Release 1.0.36
+
+- Fixed: In classic skin, selection list of identities was not in foreground
+
 ## Release 1.0.35
 
 - Fixed: INSTALL_PATH in identity_switch_newmails.php
@@ -29,7 +33,6 @@
 
 ## Release 1.0.29
 
-- Added: Support for "hievmail" skin
 - Fixed: Loop error in ident_switch_newmail.php
 - Fixed: Usage of special characters '%' for SMTP hosts in config/config.inc.php
 

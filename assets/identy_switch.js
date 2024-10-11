@@ -83,7 +83,7 @@ function identy_switch_addCbClassic($sw) {
 		$('#identy_switch_dropdown')
 			.css('left', '190px')
 			.css('top', '-40px');
-	
+			
 		return true;
 	}
 
@@ -139,6 +139,7 @@ function identy_switch_toggle_menu() {
 		// Reload window to show new mail counter in menu
 		d.load(location.href + ' #identy_switch_dropdown > *', '');
 		d.show();
+		$('#messagelist-fixedcopy').css('z-index', 'auto');
 	} else
 		d.hide();
 }
