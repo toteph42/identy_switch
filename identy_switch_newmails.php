@@ -11,7 +11,7 @@ declare(strict_types=1);
 // Include environment
 if (!defined('INSTALL_PATH'))
 	define('INSTALL_PATH', strpos($_SERVER['DOCUMENT_ROOT'], 'public_html') ?
-		   realpath(__DIR__.'/..').'/' : $_SERVER['DOCUMENT_ROOT'].'/');
+		   realpath(__DIR__.'/../..').'/' : $_SERVER['DOCUMENT_ROOT'].'/');
 require_once INSTALL_PATH.'program/include/iniset.php';
 require_once INSTALL_PATH.'plugins/identy_switch/identy_switch_rpc.php';
 require_once INSTALL_PATH.'plugins/identy_switch/identy_switch_prefs.php';
