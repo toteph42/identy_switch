@@ -1,5 +1,9 @@
 # Changelog Ident switch plugin
 
+## Release 1.0.38
+
+- Fixed: Unssen counter return from catch casted to integer.
+
 ## Release 1.0.37
 
 - Fixed: INSTALL_PATH in identity_switch_newmails.php
