@@ -1,5 +1,9 @@
 # Changelog Ident switch plugin
 
+## Release 1.0.39
+
+- Fixed: PHP warning regarding missing special folders
+
 ## Release 1.0.38
 
 - Fixed: Unssen counter return from catch casted to integer.
