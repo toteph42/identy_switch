@@ -1,5 +1,9 @@
 # Changelog Ident switch plugin
 
+## Release 1.0.41
+
+- Fixed: PHP warning regarding missing special folders
+
 ## Release 1.0.40
 
 - Fixed: PHP warning regarding missing special folders
