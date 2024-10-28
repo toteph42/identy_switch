@@ -138,7 +138,7 @@ class identy_switch_newmails extends identy_switch_rpc {
 				$folders += $storage->list_folders_subscribed('', '*'. null, null, true);
 
 			// Drop exception folders (and their subfolders)
-			if (is_array($folders))
+			if (isset($folders) && is_array($folders))
 			{
 				foreach ($rec['folders'] as $val)
 			    	if (($k = array_search($val, $folders)) !== false)
