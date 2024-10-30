@@ -596,6 +596,10 @@ class identy_switch extends identy_switch_prefs
 					continue;
 
 				$r = explode('##', $line);
+				// #35 bad formatted returned string
+				if (!is_array($r))
+					continue;
+
 				// Check for error message
 				if (!$r[1] && isset($r[2]))
 				{

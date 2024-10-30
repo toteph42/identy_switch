@@ -1,5 +1,9 @@
 # Changelog Ident switch plugin
 
+## Release 1.0.42
+
+- Fixed: php8.1-fpm.sock break down resulting in missing return records
+
 ## Release 1.0.41
 
 - Fixed: PHP warning regarding missing special folders
