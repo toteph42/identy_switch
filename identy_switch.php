@@ -17,6 +17,7 @@ declare(strict_types=1);
  * 		debug			Log debug message to 'logs/identy_switch.log'
  * 		check			Allow new mail checking
  * 		interval		Specify interval for checking of new mails
+ * 		delay			Delay between each new mail check
  * 		retries			Specify no. of retries for reading data from mail server
  * 		language		Language used
  * 		cache	 		All session variables used by identy switch
@@ -140,6 +141,8 @@ class identy_switch extends identy_switch_prefs
 						self::set('config', $k, $v, true);
 					if ($k == 'interval')
 						self::set('config', $k, $v, 30);
+					if ($k == 'delay')
+						self::set('config', $k, $v, 0);
 					if ($k == 'retries')
 						self::set('config', $k, $v, 10);
 				}
@@ -568,18 +571,14 @@ class identy_switch extends identy_switch_prefs
 
 		// Check for data file
 		$n = 0;
-		while (!($data_file = file_exists($cfg['data'])))
+		while (!file_exists($cfg['data']))
 		{
 			if ($n++ > 60)
-				break;
+			{
+				self::write_log('No data file exist - stop checking', true);
+				return $args;
+			}
 			sleep (1);
-		}
-
-		// Check for data file
-		if (!$data_file)
-		{
-			self::write_log('No data file exist - stop checking', true);
-			return $args;
 		}
 
 		// Load data file

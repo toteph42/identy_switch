@@ -56,6 +56,11 @@ class identy_switch_newmails extends identy_switch_rpc {
 		$rc->plugins->register_hook('storage_init', [ $this, 'set_language' ]);
 
 		$this->cache = unserialize(file_get_contents($this->file));
+		// Save logging configuration
+		$_SESSION[identy_switch_prefs::TABLE]['config'] = [
+			'logging' => $this->cache['config']['logging'],
+			'debug' => $this->cache['config']['debug'],
+		];
 
 		if (!$iid)
 		{
@@ -83,6 +88,21 @@ class identy_switch_newmails extends identy_switch_rpc {
 					fclose($res[$iid]);
 					self::write_data('0##Identity: '.$iid.' Cannot write to "'.$host.'" Request: "'.$req.'" - stop checking');
 					return;
+				}
+
+				// Delay execution?
+				if (count($this->cache) > 1 && $this->cache['config']['delay'])
+				{
+					if ($this->cache['config']['delay'] > 1000000)
+					{
+						identy_switch_prefs::write_log('Delay execution by "'.$this->cache['config']['delay'].'" seconds', true);
+						sleep ($this->cache['config']['delay'] / 1000000);
+					}
+					else
+					{
+						identy_switch_prefs::write_log('Delay execution by "'.$this->cache['config']['delay'].'" microseconds', true);
+						usleep ($this->cache['config']['delay']);
+					}
 				}
 			}
 
@@ -156,7 +176,7 @@ class identy_switch_newmails extends identy_switch_rpc {
 	       	$storage->close();
 
 	       	self::write_data($iid.'##'.$unseen);
-			identy_switch_prefs::write_log('Setting unseen '.$unseen.' for identity id '.$iid, true);
+			identy_switch_prefs::write_log('Setting unseen count to '.$unseen.' for identity id '.$iid, true);
 
 	       	return;
 		}

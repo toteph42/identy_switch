@@ -64,6 +64,10 @@ $config['identy_switch.config'] = [
 	// Specify interval for checking of new mails. Default is 5 min. (5 * 60 sec.)
 	'interval' 	=> 300, 
 
+	// Specify number of microseconds between each new mail check. Default is 0 micoseconds.
+	// If value is greater than 1000000 (1 second) delay time is rounded to seconds.
+	'delay' => 0,
+
 	// Specify no. of retries for reading data from mail server. Default is 10 times.
 	'retries' 	=> 10, 
 	

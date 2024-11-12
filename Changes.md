@@ -1,6 +1,11 @@
 # Changelog Ident switch plugin
 
-## Release 1.0.42
+## Release 1.0.44
+
+- Added: New mail check delay configuration parameter
+- Fixed: Logging in identy_switch_newmail.php
+
+## Release 1.0.43
 
 - Fixed: php8.1-fpm.sock break down resulting in missing return records
 
