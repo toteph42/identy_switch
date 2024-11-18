@@ -1,5 +1,9 @@
 # Changelog Ident switch plugin
 
+## Release 1.0.45
+
+- Fixed: 'Delay' not set in identy_switch_newmail.php
+
 ## Release 1.0.44
 
 - Added: New mail check delay configuration parameter

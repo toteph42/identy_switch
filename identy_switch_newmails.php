@@ -91,7 +91,7 @@ class identy_switch_newmails extends identy_switch_rpc {
 				}
 
 				// Delay execution?
-				if (count($this->cache) > 1 && $this->cache['config']['delay'])
+				if (count($this->cache) > 1 && isset($this->cache['config']['delay']) && $this->cache['config']['delay'] > 0)
 				{
 					if ($this->cache['config']['delay'] > 1000000)
 					{
