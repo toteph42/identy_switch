@@ -1,5 +1,10 @@
 # Changelog identity switch plugin
 
+## Release 1.1.0
+
+- Changed: README.MD
+- Changed: SQL scripts
+
 ## Release 1.1
 
 - Changed: Preconfiguration of identity settings modified

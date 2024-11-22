@@ -6,6 +6,7 @@
 --
 --  Created with phpmyadmin
 
+DROP TABLE IF EXISTS `identity_switch`;
 RENAME TABLE
 	`identy_switch` TO `identity_switch`;
 	
