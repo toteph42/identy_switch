@@ -2,21 +2,21 @@
 declare(strict_types=1);
 
 /*
- * 	Identy switch RoundCube Bundle
+ * 	Identity switch RoundCube Bundle
  *
  *	@copyright	(c) 2024 Forian Daeumling, Germany. All right reserved
- * 	@license 	LGPL-3.0-or-later
+ * 	@license 	https://github.com/toteph42/identity_switch/blob/master/LICENSE
  */
 
-// Include environment
+// include environment
 if (!defined('INSTALL_PATH'))
 	define('INSTALL_PATH', strpos($_SERVER['DOCUMENT_ROOT'], 'public_html') ?
 		   realpath(__DIR__.'/../..').'/' : $_SERVER['DOCUMENT_ROOT'].'/');
 require_once INSTALL_PATH.'program/include/iniset.php';
-require_once INSTALL_PATH.'plugins/identy_switch/identy_switch_rpc.php';
-require_once INSTALL_PATH.'plugins/identy_switch/identy_switch_prefs.php';
+require_once INSTALL_PATH.'plugins/identity_switch/identity_switch_rpc.php';
+require_once INSTALL_PATH.'plugins/identity_switch/identity_switch_prefs.php';
 
-class identy_switch_newmails extends identy_switch_rpc {
+class identity_switch_newmails extends identity_switch_rpc {
 
 	private $file;
 	private $cache;
@@ -29,35 +29,35 @@ class identy_switch_newmails extends identy_switch_rpc {
     {
 		$rc = rcmail::get_instance();
 
-		// Get Identity id
+		// get Identity id
 		if (is_null($iid = rcube_utils::get_input_value('iid', rcube_utils::INPUT_GET)))
 		{
-			identy_switch_prefs::write_log('Cannot load identity id - stop checking', true);
+			identity_switch_prefs::write_log('Cannot load identity id - stop checking', true);
 			return;
 		}
 
-		// Get cache file name
+		// get cache file name
 		if (is_null($this->file = rcube_utils::get_input_value('cache', rcube_utils::INPUT_GET)))
 		{
-			identy_switch_prefs::write_log('Cannot get cache file name - stop checking');
+			identity_switch_prefs::write_log('Cannot get cache file name - stop checking');
 			return;
 		} else
-			identy_switch_prefs::write_log('Cache file name "'.$this->file.'"', true);
+			identity_switch_prefs::write_log('Cache file name "'.$this->file.'"', true);
 
-		// Get cached data
+		// get cached data
 		if (!file_exists($this->file))
 		{
-			identy_switch_prefs::write_log('Cache file "'.$this->file.'" does not exists - stop checking');
+			identity_switch_prefs::write_log('Cache file "'.$this->file.'" does not exists - stop checking');
 			return;
 		} else
-			identy_switch_prefs::write_log('Cache file loaded', true);
+			identity_switch_prefs::write_log('Cache file loaded', true);
 
-		// Storage initialization hook
+		// storage initialization hook
 		$rc->plugins->register_hook('storage_init', [ $this, 'set_language' ]);
 
 		$this->cache = unserialize(file_get_contents($this->file));
-		// Save logging configuration
-		$_SESSION[identy_switch_prefs::TABLE]['config'] = [
+		// save logging configuration
+		$_SESSION[identity_switch_prefs::TABLE]['config'] = [
 			'logging' => $this->cache['config']['logging'],
 			'debug' => $this->cache['config']['debug'],
 		];
@@ -72,16 +72,16 @@ class identy_switch_newmails extends identy_switch_rpc {
 
 		        $host = ($_SERVER['SERVER_PORT'] != '80' ? 'ssl://' : '').$_SERVER['HTTP_HOST'].
 		        		':'.$_SERVER['SERVER_PORT'];
-		        $res[$iid] = new identy_switch_rpc();
+		        $res[$iid] = new identity_switch_rpc();
 				if (!$res[$iid]->open($host))
 				{
 					self::write_data($iid.'##'.$res[$iid]);
-					identy_switch_prefs::write_log('Cannot open host "'.$host.'" - stop checking', true);
+					identity_switch_prefs::write_log('Cannot open host "'.$host.'" - stop checking', true);
 					return;
 				}
 
-				// Prepare request (no fopen() usage because "allow_url_fopen=FALSE" may be set in PHP.INI)
-				$req = '/plugins/identy_switch/identy_switch_newmails.php?iid='.$iid.
+				// prepare request (no fopen() usage because "allow_url_fopen=FALSE" may be set in PHP.INI)
+				$req = '/plugins/identity_switch/identity_switch_newmails.php?iid='.$iid.
 					   '&cache='.urlencode($this->file);
 				if (!$res[$iid]->write($req))
 				{
@@ -90,23 +90,23 @@ class identy_switch_newmails extends identy_switch_rpc {
 					return;
 				}
 
-				// Delay execution?
+				// delay execution?
 				if (count($this->cache) > 1 && isset($this->cache['config']['delay']) && $this->cache['config']['delay'] > 0)
 				{
 					if ($this->cache['config']['delay'] > 1000000)
 					{
-						identy_switch_prefs::write_log('Delay execution by "'.$this->cache['config']['delay'].'" seconds', true);
+						identity_switch_prefs::write_log('Delay execution by "'.$this->cache['config']['delay'].'" seconds', true);
 						sleep ($this->cache['config']['delay'] / 1000000);
 					}
 					else
 					{
-						identy_switch_prefs::write_log('Delay execution by "'.$this->cache['config']['delay'].'" microseconds', true);
+						identity_switch_prefs::write_log('Delay execution by "'.$this->cache['config']['delay'].'" microseconds', true);
 						usleep ($this->cache['config']['delay']);
 					}
 				}
 			}
 
-			// Collect data
+			// collect data
 			$cnt = 0;
 			while (count($res) && $cnt++ < $this->cache['config']['retries'])
 			{
@@ -122,26 +122,26 @@ class identy_switch_newmails extends identy_switch_rpc {
 			if ($cnt >= $this->cache['config']['retries'])
 				self::write_data('0##Number of retries exceeded for identity '.$iid.' - stop checking');
 
-			// Delete cache data
+			// delete cache data
 			@unlink($this->file);
-			identy_switch_prefs::write_log('Cache file "'.$this->file.'" deleted', true);
+			identity_switch_prefs::write_log('Cache file "'.$this->file.'" deleted', true);
 
 			return;
 		} else {
 
 			$rec = $this->cache[$iid];
 
-	   		// Must delete storage object, to get SSL status reset
+	   		// must delete storage object, to get SSL status reset
 			$rc->storage = null;
 
-			// Connect
+			// connect
 			$storage = $rc->get_storage();
 
 			if (substr($rec['imap_host'], 4, 1) == ':')
 				$rec['imap_enc'] = '';
 			else
-				$rec['imap_enc'] = $rec['flags'] & identy_switch::IMAP_SSL ? 'ssl' :
-								   ($rec['flags'] & identy_switch::IMAP_TLS ? 'tls' : '');
+				$rec['imap_enc'] = $rec['flags'] & identity_switch_prefs::IMAP_SSL ? 'ssl' :
+								   ($rec['flags'] & identity_switch_prefs::IMAP_TLS ? 'tls' : '');
 			if (!$storage->connect($rec['imap_host'], $rec['imap_user'],
 			  					   $rc->decrypt($rec['imap_pwd']), $rec['imap_port'], $rec['imap_enc']))
 			{
@@ -151,21 +151,18 @@ class identy_switch_newmails extends identy_switch_rpc {
 				return;
 			}
 
-			// Get list of all subscribed folders
+			// get list of all subscribed folders
 			$storage = $rc->get_storage();
 			$folders = [ 'INBOX' ];
-			if ($rec['flags'] & identy_switch::CHECK_ALLFOLDER)
+			if ($rec['flags'] & identity_switch_prefs::CHECK_ALLFOLDER)
 				$folders += $storage->list_folders_subscribed('', '*'. null, null, true);
 
-			// Drop exception folders (and their subfolders)
-			if (isset($rec['folders']) && is_array($rec['folders']))
-			{
-				foreach ($rec['folders'] as $val)
-			    	if (($k = array_search($val, $folders)) !== false)
-						unset($folders[$k]);
-			}
+			// drop exception folders (and their subfolders)
+			foreach ($rec['folders'] as $val)
+		    	if (($k = array_search($val, $folders)) !== false)
+					unset($folders[$k]);
 
-			// Count unseen
+			// count unseen
 			$unseen = 0;
 			foreach($folders as $mbox)
 			{
@@ -176,7 +173,7 @@ class identy_switch_newmails extends identy_switch_rpc {
 	       	$storage->close();
 
 	       	self::write_data($iid.'##'.$unseen);
-			identy_switch_prefs::write_log('Setting unseen count to '.$unseen.' for identity id '.$iid, true);
+			identity_switch_prefs::write_log('Setting unseen count to '.$unseen.' for identity id '.$iid, true);
 
 	       	return;
 		}
@@ -208,10 +205,10 @@ class identy_switch_newmails extends identy_switch_rpc {
     		if (is_resource($this->fp))
     			fclose($this->fp);
 
-			// Open output file
+			// open output file
 			if (!($this->fp = @fopen($this->cache['config']['data'], 'a')))
 			{
-				identy_switch_prefs::write_log('Error opening data file "'.$this->cache['config']['data'].'"');
+				identity_switch_prefs::write_log('Error opening data file "'.$this->cache['config']['data'].'"');
 				return false;
 			}
 			return fwrite($this->fp, time().'##'.$msg.'###') !== false ? true : false;
@@ -222,5 +219,5 @@ class identy_switch_newmails extends identy_switch_rpc {
 
 }
 
-$obj = new identy_switch_newmails();
+$obj = new identity_switch_newmails();
 $obj->run();

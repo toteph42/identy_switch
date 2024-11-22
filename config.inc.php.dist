@@ -1,18 +1,18 @@
 <?php
 /*
- * 	Identy switch RoundCube Bundle
+ * 	Identity switch RoundCube Bundle
  *
  *	@copyright	(c) 2024 Forian Daeumling, Germany. All right reserved
- * 	@license 	LGPL-3.0-or-later
+ * 	@license 	https://github.com/toteph42/identity_switch/blob/master/LICENSE
  */
 
-$config['identy_switch.config'] = [
+$config['identity_switch.config'] = [
 
 	// Preconfigured settings for different mail domains.
  	// Appropriate set of values is searched by mapping domain of email (from identity) to array key.
  	
  	// Please note:
- 	// - Using config.inc.php is only done, when you enter identy_switch configuration panel!
+ 	// - Using config.inc.php is only done, when you enter identity_switch configuration panel!
  	// - On Startup of RoundCube all configuration parameters were loaded from data base, so changes to this
  	//   configuration file does not apply.
 	
@@ -55,7 +55,7 @@ $config['identy_switch.config'] = [
 	//		'delimiter' => '/',
 	//	],
 
-	// Allow logging to 'logs/identy_switch.log'. Default is false.
+	// Allow logging to 'logs/identity_switch.log'. Default is false.
 	'logging'	=> false,
 
 	// Allow new mail checking. Default is true.

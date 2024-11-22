@@ -2,10 +2,10 @@
 declare(strict_types=1);
 
 /*
- * 	Identy switch RoundCube Bundle
+ * 	Identity switch RoundCube Bundle
  *
  *	@copyright	(c) 2024 Forian Daeumling, Germany. All right reserved
- * 	@license 	LGPL-3.0-or-later
+ * 	@license 	https://github.com/toteph42/identity_switch/blob/master/LICENSE
  */
 $labels = [];
 

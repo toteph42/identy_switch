@@ -1,6 +1,12 @@
+--
+-- 	Identity switch RoundCube Bundle
+--
+--	@copyright	(c) 2024 Forian Daeumling, Germany. All right reserved
+-- 	@license 	https://github.com/toteph42/identity_switch/blob/master/LICENSE
+--
 -- Created with: https://sqliteonline.com/
 
-CREATE TABLE IF NOT EXISTS `identy_switch`(
+CREATE TABLE IF NOT EXISTS `identity_switch`(
 	`id` INTEGER  NOT NULL ,
 	`user_id` INTEGER  NOT NULL REFERENCES users(user_id) ON DELETE CASCADE ON UPDATE CASCADE,
 	`iid` INTEGER  NOT NULL REFERENCES identities(identity_id) ON DELETE CASCADE ON UPDATE CASCADE UNIQUE,
@@ -22,5 +28,5 @@ CREATE TABLE IF NOT EXISTS `identy_switch`(
 	UNIQUE (user_id, label)
 );
 
-CREATE INDEX IX_identy_switch_user_id ON identy_switch(user_id);
-CREATE INDEX IX_identy_switch_iid on identy_switch(iid);
+CREATE INDEX IX_identity_switch_user_id ON identity_switch(user_id);
+CREATE INDEX IX_identity_switch_iid on identity_switch(iid);

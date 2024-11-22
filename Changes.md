@@ -1,13 +1,22 @@
-# Changelog Ident switch plugin
+# Changelog identity switch plugin
+
+## Release 1.1
+
+- Changed: Preconfiguration of identity settings modified
+- Fixed: Disabled identities now ignored
+- Fixed: Unseen count sometimes wrong, when switching identity
+- Fixed: Some typos in code
+- Changed renamed from identy_switch to identity_switch
+- Fixed: Modification / deletion of default identity in setting handled properly
 
 ## Release 1.0.45
 
-- Fixed: 'Delay' not set in identy_switch_newmail.php
+- Fixed: 'Delay' not set in identity_switch_newmail.php
 
 ## Release 1.0.44
 
 - Added: New mail check delay configuration parameter
-- Fixed: Logging in identy_switch_newmail.php
+- Fixed: Logging in identity_switch_newmail.php
 
 ## Release 1.0.43
 
@@ -49,7 +58,7 @@
 
 ## Release 1.0.33
 
-- Fixed: PHP Warning in identy_switch.php:363
+- Fixed: PHP Warning in identity_switch.php:363
 
 ## Release 1.0.32
 
@@ -90,7 +99,7 @@
 
 ## Release 1.0.24
 
-- Fixed: Bug in preferences (identy edit)
+- Fixed: Bug in preferences (identity edit)
 - Fixed: Bug when trying to send mails with default identity
 
 ## Release 1.0.23
@@ -125,7 +134,7 @@
 
 ## Release 1.0.17
 
-- Identyswitch menu is now automatically closed if user clicks somewhere on screen
+- identityswitch menu is now automatically closed if user clicks somewhere on screen
 
 ## Release 1.0.15
 
@@ -135,7 +144,7 @@
 ## Release 1.0.14
 
 - Error message prefixed by "idsw".
-- If identy is set as default, hen disable identy_switch handling.
+- If identity is set as default, hen disable identity_switch handling.
 - If a new record is created, it is not possible to return any error message due to RoundCube design.
 - Fixed some error messages.
 
@@ -149,8 +158,8 @@
 ## Release 1.0.12
 
 - 'dont_override' option documented.
-- Bug fixed when changing standard identy name.
-- Some bugs fixed when trying to edit identy record.
+- Bug fixed when changing standard identity name.
+- Some bugs fixed when trying to edit identity record.
 
 ## Release 1.0.11
 
@@ -170,7 +179,7 @@
 
 ## Release 1.0.7
 
-- Unseen count on active account moved to identy_switch_do_switch().
+- Unseen count on active account moved to identity_switch_do_switch().
 
 ## Release 1.0.6
 
@@ -185,7 +194,7 @@
 
 ## Release 1.0.4
 
-- Function create_menu() moved back to identy_switch.php.
+- Function create_menu() moved back to identity_switch.php.
 
 ## Release 1.0.3
 

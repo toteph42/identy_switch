@@ -1,11 +1,11 @@
 /*
- * 	Identy switch RoundCube Bundle
+ * 	Identity switch RoundCube Bundle
  *
  *	@copyright	(c) 2024 Forian Daeumling, Germany. All right reserved
- * 	@license 	LGPL-3.0-or-later
+ * 	@license 	https://github.com/toteph42/identity_switch/blob/master/LICENSE
  */
 
-#identy_switch_menu {
+#identity_switch_menu {
 	margin-right: 0px;
 	overflow: hidden;
 	text-overflow: ellipsis;
@@ -23,7 +23,7 @@
  	float: inline-start;
 }
 
-#identy_switch_dropdown {
+#identity_switch_dropdown {
 	position: fixed;
   	z-index: 1;
 	padding: 0 .5rem 0 0;
@@ -51,13 +51,13 @@
   	line-height: 35px;
 }	
 
-#identy_switch_dropdown ul {
+#identity_switch_dropdown ul {
 	list-style: none;
 	margin: 0;
 	padding: 0;
 }
 	
-#identy_switch_dropdown li {
+#identity_switch_dropdown li {
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
@@ -66,22 +66,22 @@
 	width: 220px;
 }
 	
-#identy_switch_dropdown a {
+#identity_switch_dropdown a {
 	padding: 0 .5rem;
 	white-space: nowrap;
 	color: #2c363a;
 	background: none;
 }
 	
-#identy_switch_dropdown li:hover {
+#identity_switch_dropdown li:hover {
 	background-color: rgb(236, 236, 236);
 }	
 	
-#identy_switch_dropdown a:hover {
+#identity_switch_dropdown a:hover {
 	text-decoration: none;
 }
 
-#identy_switch_dropdown .unseen {
+#identity_switch_dropdown .unseen {
 	position: absolute;
   	top: 0;
   	right: 0;
@@ -96,7 +96,7 @@
   	font-weight: 700;
 }
 
-html.dark-mode #identy_switch_menu {
+html.dark-mode #identity_switch_menu {
 	margin-right: 0px;
 	overflow: hidden;
 	text-overflow: ellipsis;
@@ -114,17 +114,17 @@ html.dark-mode #identy_switch_menu {
  	float: inline-start;
 }
 
-html.dark-mode #identy_switch_dropdown {
+html.dark-mode #identity_switch_dropdown {
 	background-color: #343a40;
 	border-color: #4d6066;
 	box-shadow: 3px 3px 5px #374549;
 }
 
-html.dark-mode #identy_switch_dropdown a {
+html.dark-mode #identity_switch_dropdown a {
 	color: #c5d1d3;
 }
 		
-html.dark-mode #identy_switch_dropdown li:hover {
+html.dark-mode #identity_switch_dropdown li:hover {
 	background-color: #374549;
 }
 

@@ -6,7 +6,6 @@
 --
 --  Created with phpmyadmin
 
-ALTER TABLE
-	`identity_switch`
-CHANGE `imap_pwd` `imap_pwd` VARCHAR(128);
+RENAME TABLE
+	`identy_switch` TO `identity_switch`;
 	

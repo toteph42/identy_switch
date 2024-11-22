@@ -2,51 +2,51 @@
 declare(strict_types=1);
 
 /*
- * 	Identy switch RoundCube Bundle
+ * 	Identity switch RoundCube Bundle
  *
  *	@copyright	(c) 2024 Forian Daeumling, Germany. All right reserved
- * 	@license 	LGPL-3.0-or-later
+ * 	@license 	https://github.com/toteph42/identity_switch/blob/master/LICENSE
  */
 
 /**
  *
  * 	Data structure
  *
- * 	config 				Configuration data
- * 		logging			Allow logging to 'logs/identy_switch.log'
- * 		debug			Log debug message to 'logs/identy_switch.log'
- * 		check			Allow new mail checking
- * 		interval		Specify interval for checking of new mails
- * 		delay			Delay between each new mail check
- * 		retries			Specify no. of retries for reading data from mail server
- * 		language		Language used
- * 		cache	 		All session variables used by identy switch
- * 		data	  		Unseen exchange data file
- * 		fp				File pointer
- * 	iid					Active identity (-1 = default user)
- * 	[n]					Cached identity data
- * 		label			Label
- * 		flags			Flags
+ * 	config 				configuration data
+ * 		logging			allow logging to 'logs/identity_switch.log'
+ * 		debug			log debug message to 'logs/identity_switch.log'
+ * 		check			allow new mail checking
+ * 		interval		specify interval for checking of new mails
+ * 		delay			delay between each new mail check
+ * 		retries			specify no. of retries for reading data from mail server
+ * 		language		language used
+ * 		cache	 		all session variables used by identity switch
+ * 		data	  		unseen exchange data file
+ * 		fp				file pointer
+ * 	iid					active identity
+ * 	[n]					cached identity data
+ * 		label			label
+ * 		flags			glags
  * 		imap_user		IMAP user
  * 		imap_pwd		IMAP password
  * 		imap_host		IMAP host
- * 		imap_delim		Folder delimiter
+ * 		imap_delim		golder delimiter
  * 		imap_port		IMAP port
  * 		smtp_host		SMTP host
  * 		smtp_port		SMTP port
- * 		notify_timeout	Notification timeout
- * 		newmail_check	New mail check interval
- * 		folders			Special folder name array
+ * 		notify_timeout	notification timeout
+ * 		newmail_check	new mail check interval
+ * 		folders			special folder name array
  * 		unseen			# of unseen messages
- * 		checked_last	Last time checked
- * 		notify			Notify user flag
+ * 		checked_last	last time checked
+ * 		notify			notify user flag
  *
  */
 
-require_once INSTALL_PATH.'plugins/identy_switch/identy_switch_prefs.php';
-require_once INSTALL_PATH.'plugins/identy_switch/identy_switch_newmails.php';
+require_once INSTALL_PATH.'plugins/identity_switch/identity_switch_prefs.php';
+require_once INSTALL_PATH.'plugins/identity_switch/identity_switch_newmails.php';
 
-class identy_switch extends identy_switch_prefs
+class identity_switch extends identity_switch_prefs
 {
 	/**
 	 * 	Initialize Plugin
@@ -58,23 +58,25 @@ class identy_switch extends identy_switch_prefs
 	{
 		$rc = rcmail::get_instance();
 
-		// Identy switch hooks and actions
+##
+## unset($_SESSION[self::TABLE]);
+		// identity switch hooks and actions
 		$this->add_hook('startup', 						  [ $this, 'on_startup' ]);
 		$this->add_hook('render_page', 					  [ $this, 'on_render_page' ]);
 		$this->add_hook('smtp_connect', 				  [ $this, 'on_smtp_connect' ]);
 		$this->add_hook('template_object_composeheaders', [ $this, 'on_object_composeheaders' ]);
-		$this->register_action('identy_switch_do',  	  [ $this, 'identy_switch_do_switch' ]);
+		$this->register_action('identity_switch_do',  	  [ $this, 'identity_switch_do_switch' ]);
 
-		// Preference hooks and actions
+		// preference hooks and actions
 		parent::init();
 
-		// Notification hooks and action
+		// notification hooks and action
 		if ($rc->output instanceof rcmail_output_html) {
-			$rc->output->add_script('identy_switch_init();', 'head_top');
-			$rc->output->include_script('../../plugins/identy_switch/assets/identy_switch.js');
+			$rc->output->add_script('identity_switch_init();', 'head_top');
+			$rc->output->include_script('../../plugins/identity_switch/assets/identity_switch.js');
 		}
 
-		// New mail hooks and action
+		// new mail hooks and action
 		$this->add_hook('new_messages', 				  [ $this, 'catch_newmails' ]);
 		$this->add_hook('refresh', 			  			  [ $this, 'check_newmails' ]);
 		$this->add_hook('ready',	 					  [ $this, 'check_newmails' ]);
@@ -83,7 +85,7 @@ class identy_switch extends identy_switch_prefs
 		if ($rc->config->get('ldapAliasSync', null))
 			$this->add_hook('storage_connect', [ $this, 'override_ldap_password' ]);
 
-		$this->include_stylesheet('assets/identy_switch.css');
+		$this->include_stylesheet('assets/identity_switch.css');
 	}
 
 	/**
@@ -96,9 +98,10 @@ class identy_switch extends identy_switch_prefs
 	{
 		$rc = rcmail::get_instance();
 
-		if (strcasecmp($rc->user->data['username'], $_SESSION['username']) !== 0)
+		// not default user?
+		if (isset($_SESSION['username']) && strcasecmp($rc->user->data['username'], $_SESSION['username']) !== 0)
 		{
-			// We are impersonating
+			// we are impersonating
 			$rc->config->set('imap_cache', null);
 			$rc->config->set('messages_cache', false);
 
@@ -128,46 +131,35 @@ class identy_switch extends identy_switch_prefs
 
 			$this->add_texts('localization');
 
-			// First call?
-			if (!self::get(null, 'iid'))
+			// first call?
+			if (!isset($_SESSION[identity_switch_prefs::TABLE]['iid']) || !$_SESSION[identity_switch_prefs::TABLE]['iid'])
 			{
-				// load configuration
-				$this->load_config();
-				foreach ($rc->config->get('identy_switch.config', []) as $k => $v)
-				{
-					if ($k == 'logging' || $k == 'debug')
-						self::set('config', $k, $v, false);
-					if ($k == 'check')
-						self::set('config', $k, $v, true);
-					if ($k == 'interval')
-						self::set('config', $k, $v, 30);
-					if ($k == 'delay')
-						self::set('config', $k, $v, 0);
-					if ($k == 'retries')
-						self::set('config', $k, $v, 10);
-				}
-				self::set('config', 'language', $_SESSION['language']);
+				$iid = $rc->user->get_identity();
+				$iid = $iid['identity_id'];
 
-				// Set default user
-				self::set(null, 'iid', -1);
+				// create defaults for default user
+				self::get($iid);
 
-				// Collect data for default identity
+				// set default user number
+				self::set('iid', $iid);
+
+				// collect data for default identity
 				$i = $rc->user->get_identity();
-				self::set(-1, 'label', $i['name']);
-				self::set(-1, 'flags', self::ENABLED);
+				self::set($iid, 'label', $i['name']);
+				self::set($iid, 'flags', self::ENABLED);
 
-				// Swap IMAP data
-				self::set(-1, 'imap_user', $_SESSION['username']);
-				self::set(-1, 'imap_pwd', $_SESSION['password']);
-				self::set(-1, 'imap_host', $_SESSION['storage_host']);
-				self::set(-1, 'imap_port', $_SESSION['storage_port']);
+				// swap IMAP data
+				self::set($iid, 'imap_user', $_SESSION['username']);
+				self::set($iid, 'imap_pwd', $_SESSION['password']);
+				self::set($iid, 'imap_host', $_SESSION['storage_host']);
+				self::set($iid, 'imap_port', $_SESSION['storage_port']);
 				if ($_SESSION['storage_ssl'] == 'ssl')
-					self::set(-1, 'flags', (int)self::get(-1, 'flags') | self::IMAP_SSL);
+					self::set($iid, 'flags', self::get($iid, 'flags') | self::IMAP_SSL);
 				if ($_SESSION['storage_ssl'] == 'tls')
-					self::set(-1, 'flags', (int)self::get(-1, 'flags') | self::IMAP_TLS);
-				self::set(-1, 'imap_delim', $_SESSION['imap_delimiter']);
+					self::set($iid, 'flags', self::get($iid, 'flags') | self::IMAP_TLS);
+				self::set($iid, 'imap_delim', $_SESSION['imap_delimiter']);
 
-				// Swap SMTP data
+				// Sswap SMTP data
 				$hosts = $rc->config->get('smtp_host');
 				if (!is_array ($hosts))
 					$hosts = [ $_SESSION['storage_host'] => $hosts ];
@@ -186,69 +178,63 @@ class identy_switch extends identy_switch_prefs
 									 '- substituting with "localhost"');
 					$host = 'localhost';
 				}
-				// Parse hoost name for special characters
+				// parse hoost name for special characters
 				$host = rcube_utils::parse_host($host);
 
 				if (substr($host, 3, 1) == ':')
 				{
 					if (strtolower(substr($host, 0, 3)) == 'ssl')
 					{
-						self::set(-1, 'flags', self::get(-1, 'flags') | self::SMTP_SSL);
+						self::set($iid, 'flags', self::get($iid, 'flags') | self::SMTP_SSL);
 						$host = substr($host, 6);
-						self::set(-1, 'smtp_port', 465);
+						self::set($iid, 'smtp_port', 465);
 					}
 					elseif (strtolower(substr($host, 0, 3)) == 'tls')
 					{
-						self::set(-1, 'flags', self::get(-1, 'flags') | self::SMTP_TLS);
+						self::set($iid, 'flags', self::get($iid, 'flags') | self::SMTP_TLS);
 						$host = substr($host, 6);
-						self::set(-1, 'smtp_port', 587);
+						self::set($iid, 'smtp_port', 587);
 					}
 					// Unknown protocoll
 					if (($p = strpos($host, ':')) !== false)
 					{
-						self::set(-1, 'smtp_port', substr($host, $p + 1));
+						self::set($iid, 'smtp_port', substr($host, $p + 1));
 						$host = substr($host, 0, $p);
 					}
-				} else
-					self::set(-1, 'smtp_port', 25);
-				self::set(-1, 'smtp_host', $host);
+				}
+				self::set($iid, 'smtp_host', $host);
 
 				$prefs = $rc->user->get_prefs();
 
-				// Swap nofication data
+				// swap nofication data
 				$p = 'newmail_notifier_';
 				if (isset($prefs['check_all_folders']) && $prefs['check_all_folders'])
-					self::set(-1, 'flags', self::get(-1, 'flags') | self::CHECK_ALLFOLDER);
+					self::set($iid, 'flags', self::get($iid, 'flags') | self::CHECK_ALLFOLDER);
 				foreach ([ 'basic' 	 => self::NOTIFY_BASIC,
 						   'desktop' => self::NOTIFY_DESKTOP,
  		        		   'sound' 	 => self::NOTIFY_SOUND] as $k => $v)
 		        {
 		            if (isset($prefs[$p.$k]) && $prefs[$p.$k] == 1)
-						self::set(-1, 'flags', self::get(-1, 'flags') | $v);
+						self::set($iid, 'flags', self::get($iid, 'flags') | $v);
 	            }
-	            self::set(-1, 'notify_timeout', isset($prefs[$p.'_desktop_timeout']) ?
-	            									  $prefs[$p.'_desktop_timeout'] : 10);
+	            if (isset($prefs[$p.'_desktop_timeout']))
+		            self::set($iid, 'notify_timeout', $prefs[$p.'_desktop_timeout']);
 
-	            // Swap new mail check interval
-				self::set(-1, 'newmail_check', isset($prefs['refresh_interval']) ? $prefs['refresh_interval'] :
+	            // swap new mail check interval
+				self::set($iid, 'newmail_check', isset($prefs['refresh_interval']) ? $prefs['refresh_interval'] :
 						  $rc->config->get('refresh_interval'));
 
-				// Swap special folder names
+				// swap special folder names
 				$box = [];
 				foreach (rcube_storage::$folder_types as $mbox)
 					$box[$mbox] = isset($prefs[$mbox.'_mbox']) ? $prefs[$mbox.'_mbox'] : '';
-				self::set(-1, 'folders', $box);
+				self::set($iid, 'folders', $box);
 				if (isset($prefs['show_real_foldernames']) && $prefs['show_real_foldernames'] == 'true')
-					self::set(-1, 'flags', self::get(-1, 'flags') | self::SHOW_REAL_FOLDER);
-				self::set(-1, 'flags', self::get(-1, 'flags') | (isset($prefs['lock_special_folders']) &&
+					self::set($iid, 'flags', self::get($iid, 'flags') | self::SHOW_REAL_FOLDER);
+				self::set($iid, 'flags', self::get($iid, 'flags') | (isset($prefs['lock_special_folders']) &&
 				   $prefs['lock_special_folders'] == true ? self::LOCK_SPECIAL_FOLDER : 0));
 
-				// Volatile variables
-				self::set(-1, 'unseen', 0);
-				self::set(-1, 'checked_last', 0);
-				self::set(-1, 'notify', false);
-
-				// Swap data of alternate accounts
+				// swap data of alternate accounts
 				$sql = 'SELECT isw.* '.
 					   'FROM '.$rc->db->table_name(self::TABLE).' isw '.
 					   'INNER JOIN '.$rc->db->table_name('identities').' ii ON isw.iid=ii.identity_id '.
@@ -257,18 +243,19 @@ class identy_switch extends identy_switch_prefs
 
 				while ($r = $rc->db->fetch_assoc($q))
 				{
-					foreach ($r as $k => $v)
+					if ($iid != $r['iid'])
 					{
-						if ($k == 'id' || $k == 'user_id' || $k == 'iid')
-							continue;
-						if ($k == 'folders')
-							$v = is_null($v) ? [] : json_decode($v);
-						self::set($r['iid'], $k, $v);
+						// create default setting
+						self::get($r['iid']);
+						foreach ($r as $k => $v)
+						{
+							if ($k == 'id' || $k == 'user_id' || $k == 'iid')
+								continue;
+							if ($k == 'folders')
+								$v = is_null($v) ? [] : json_decode($v);
+							self::set($r['iid'], $k, $v);
+						}
 					}
-					// Volatile variables
-					self::set($r['iid'], 'unseen', 0);
-					self::set($r['iid'], 'checked_last', 0);
-					self::set($r['iid'], 'notify', false);
 				}
 			}
 			if ($args['template'] == 'mail')
@@ -276,7 +263,7 @@ class identy_switch extends identy_switch_prefs
 			break;
 
 		case 'settings':
-			$this->include_script('assets/identy_switch-form.js');
+			$this->include_script('assets/identity_switch-form.js');
 			break;
 		}
 
@@ -290,32 +277,32 @@ class identy_switch extends identy_switch_prefs
 	{
 		$rc = rcmail::get_instance();
 
-		// Build identity table
+		// build identity table
 		$acc = [];
 		foreach (self::get() as $iid => $rec)
 		{
-			// Identy switch enabled?
+			// identity switch enabled?
 			if (is_numeric($iid) && is_array($rec) && ($rec['flags'] & self::ENABLED))
 				$acc[rcube::Q($rec['label'])] = [ 'iid' => $iid, 'unseen' => $rec['unseen'] ];
 		}
 
-		// Sort identities
+		// sort identities
 		ksort($acc);
 
-		// Render UI if user has extra accounts
+		// render UI if user has extra accounts
 		if (count($acc) > 1)
 		{
-			$iid = self::get(null, 'iid');
-			$div = '<div id="identy_switch_menu" '.
+			$iid = self::get('iid');
+			$div = '<div id="identity_switch_menu" '.
 				   'class="form-control" '.
-				   'onclick="identy_switch_toggle_menu()">'.
+				   'onclick="identity_switch_toggle_menu()">'.
 				   rcube::Q(self::get($iid, 'label')).
-				   '<div id="identy_switch_dropdown"><ul>';
+				   '<div id="identity_switch_dropdown"><ul>';
 			foreach ($acc as $name => $rec)
 				if ($rec['iid'] != $iid)
 				{
-					$div .= '<li onclick="identy_switch_run('.$rec['iid'].');"><a href="#">'.$name.
-					  	   	'<span id="identy_switch_opt_'.$rec['iid'].'" class="unseen">'.
+					$div .= '<li onclick="identity_switch_run('.$rec['iid'].');"><a href="#">'.$name.
+					  	   	'<span id="identity_switch_opt_'.$rec['iid'].'" class="unseen">'.
 					  	   	($rec['unseen'] > 0 ? $rec['unseen'] : '').'</span></a></li>';
 				}
 			$rc->output->add_footer($div.'</ul></div></div>');
@@ -325,58 +312,32 @@ class identy_switch extends identy_switch_prefs
 	/**
 	 * 	Perform identity switch
 	 */
-	function identy_switch_do_switch(): void
+	function identity_switch_do_switch(): void
 	{
 		$rc = rcmail::get_instance();
 
 		$rc->session->remove('folders');
 		$rc->session->remove('unseen_count');
 
-		// Force reload of unseen counter
-		$iid = self::get(null, 'iid');
-		self::set($iid, 'flags', self::get($iid, 'flags') | self::UNSEEN);
-		self::set($iid, 'unseen', 0);
-        self::set($iid, 'checked_last', 0);
+		// update current unseen counter
+		$iid = self::get('iid');
+		$folders = [ 'INBOX' ];
+		$storage = $rc->get_storage();
+		if (self::get($iid, 'flags') & identity_switch_prefs::CHECK_ALLFOLDER)
+			$folders += $storage->list_folders_subscribed('', '*'. null, null, true);
+		$unseen  = 0;
+		foreach ($folders as $mbox)
+			$unseen += $storage->count($mbox, 'UNSEEN', true, false);
+		self::set($iid, 'unseen', $unseen);
+        self::set($iid, 'checked_last', time());
 
-		// Get new account
-		$iid = rcube_utils::get_input_value('identy_switch_iid', rcube_utils::INPUT_POST);
-		$rec = self::get($iid);
+		// get new account
+		$rec = self::get($iid = rcube_utils::get_input_value('identity_switch_iid', rcube_utils::INPUT_POST));
 
-		if ($iid == -1)
-			$this->write_log('Switching back to default identity "'.$rec['imap_user'].'"');
-		else
-			$this->write_log('Switching to identity "'.$rec['imap_user'].'"');
+		$this->write_log('Switching to identity "'.$rec['imap_user'].'"');
 
-		$_SESSION['_name'] 				= $rec['label'];
-		$_SESSION['username'] 			= $rec['imap_user'];
-		$_SESSION['password'] 			= $rec['imap_pwd'];
-		$_SESSION['storage_host'] 		= $rec['imap_host'];
-		$_SESSION['storage_port'] 		= $rec['imap_port'];
-		$_SESSION['storage_ssl'] 		= $rec['flags'] & self::IMAP_SSL ? 'ssl' :
-										  ($rec['flags'] & self::IMAP_TLS ? 'tls' : '');
-		$_SESSION['imap_delimiter'] 	= $rec['imap_delim'];
-		$_SESSION['unseen']				= $rec['unseen'];
-		self::set(null, 'iid', $iid);
-
-		$prefs = $rc->user->get_prefs();
-
-		// Set special folder
-		$prefs['show_real_foldernames'] = $rec['flags'] & self::SHOW_REAL_FOLDER ? true : false;
-		$prefs['lock_special_folders'] = $rec['flags'] & self::LOCK_SPECIAL_FOLDER ? true : false;
-		if (isset($rec['folders']) && is_array($rec['folders']))
-			foreach ($rec['folders'] as $k => $v)
-				$prefs[$k.'_mbox'] = $v;
-		$prefs['check_all_folders'] = $rec['flags'] & self::CHECK_ALLFOLDER ? '1' : '0';
-		$prefs['newmail_notifier_desktop_timeout'] = $rec['notify_timeout'];
-
-		// Set notification
-		foreach ([ 	self::NOTIFY_BASIC		=> 'basic',
-					self::NOTIFY_DESKTOP	=> 'desktop',
-					self::NOTIFY_SOUND		=> 'sound' ] as $k => $v)
-			if ($rec['flags'] & $k)
-				$prefs['newmail_notifier_'.$v] = '1';
-		$prefs['newmail_notifier_timeout'] = $rec['notify_timeout'];
-	    $rc->user->save_prefs($prefs);
+		// swap data
+		self::swap($iid, $rec);
 
 		$rc->output->redirect(
 			[
@@ -387,7 +348,7 @@ class identy_switch extends identy_switch_prefs
 	}
 
 	/**
-	 * 	Send Mail
+	 * 	Send mail
 	 *
 	 * 	@param array $args
 	 * 	@return array
@@ -396,7 +357,7 @@ class identy_switch extends identy_switch_prefs
 	{
 		$rc = rcmail::get_instance();
 
-		$rec = self::get(null, (string)self::get(null, 'iid'));
+		$rec = self::get(self::get('iid'));
 
 		$args['smtp_user'] = $rec['imap_user'];
         $args['smtp_pass'] = $rec['imap_pwd'] && ($rec['flags'] & (self::SMTP_SSL|self::SMTP_TLS)) ?
@@ -419,7 +380,7 @@ class identy_switch extends identy_switch_prefs
 		{
 			$rc = rcmail::get_instance();
 			if (strcasecmp($_SESSION['username'], $rc->user->data['username']) !== 0)
-				$rc->output->add_script('identy_switch_fixIdent('.self::get(null, 'iid').');', 'docready');
+				$rc->output->add_script('identity_switch_fixIdent('.self::get('iid').');', 'docready');
 		}
 	}
 
@@ -433,7 +394,7 @@ class identy_switch extends identy_switch_prefs
     {
 		$rc = rcmail::get_instance();
 
-    	// Do not do anything for default identity
+    	// do not do anything for default identity
         if (strcasecmp($args['user'], $rc->user->data['username']) === 0)
         	return $args;
 
@@ -446,7 +407,7 @@ class identy_switch extends identy_switch_prefs
         	if($r['imap_pwd'])
             {
             	$this->write_log('Override IMAP password for user "' .$args['user'].'"');
-                // Replace 'password' with the password you want to use
+                // replace 'password' with the password you want to use
                 $args['pass'] = $rc->decrypt($r['imap_pwd']);
             }
          }
@@ -459,7 +420,7 @@ class identy_switch extends identy_switch_prefs
 	 */
 	function catch_newmails(array $args): array
 	{
-        // Unexpected input?
+        // unexpected input?
         if (empty($args['diff']['new']))
             return $args;
 
@@ -482,46 +443,35 @@ class identy_switch extends identy_switch_prefs
 	 */
 	function check_newmails($args) {
 
-		$rc = rcmail::get_instance();
-
-		// Get configuration
+		// get configuration
 		if(!is_array($cfg = self::get('config')))
 			return $args;
 
-		// First time call?
-		if (!isset($cfg['cache']))
-		{
-			self::set('config', 'cache', $cfg['cache'] = $rc->config->get('temp_dir',
-					  sys_get_temp_dir()).'/identy_switch_cache.'.session_id());
-			self::set('config', 'data', $cfg['data'] = str_replace('_cache', '_ret', $cfg['cache']));
-			self::set('config', 'fp', $cfg['fp'] = 0);
-		}
-
-		// Feature disabled?
-		if (!$cfg['check'])
+		// new mail check disabled?
+		if (!self::get('config', 'check'))
 		{
 			self::write_log('New mail check disabled - stop checking', true);
 			return $args;
 		}
 
-		// Only allow call under special conditions
+		// only allow call under special conditions
 		if (!isset($args['action']) || ($args['action'] != 'refresh' && $args['action'] != 'getunread'))
 			return $args;
 
 		self::write_log('Starting new mail check with arguments "'.serialize($args).'"."', true);
 		self::write_log('Configuration loaded "'.serialize($cfg).'".', true);
 
-		// Make a copy of our cached data
+		// make a copy of our cached data
 		$cache = self::get();
 
-		// Check if we're outside waiting window
+		// check if we're outside waiting window
 		$chk = 0;
 		foreach ($cache as $iid => $rec)
 		{
 			if (!is_integer($iid))
 				continue;
 
-			if ((int)$rec['checked_last'] + $cfg['interval'] < time())
+			if ((int)$rec['flags'] & identity_switch_prefs::ENABLED && (int)$rec['checked_last'] + $cfg['interval'] < time())
 				$chk++;
 			else
 				unset($cache[$iid]);
@@ -543,7 +493,7 @@ class identy_switch extends identy_switch_prefs
 			if (!is_resource($cfg['fp']))
 			{
 			    $host = ($_SERVER['SERVER_PORT'] != '80' ? 'ssl://' : '').$_SERVER['HTTP_HOST'].':'.$_SERVER['SERVER_PORT'];
-			    self::set('config', 'fp', $cfg['fp'] = new identy_switch_rpc());
+			    self::set('config', 'fp', $cfg['fp'] = new identity_switch_rpc());
 				if (is_string($cfg['fp']->open($host)))
 				{
 					$this->write_log('New mail chking error - '.$cfg['fp'].' for '.$host.' - stop checking');
@@ -552,13 +502,13 @@ class identy_switch extends identy_switch_prefs
 				self::write_log('Host "'.$host.'" opened', true);
 			}
 
-			// Save data for background sharing
+			// save data for background sharing
 			file_put_contents($cfg['cache'], serialize($cache));
 
 			self::write_log('Cache file "'.$cfg['cache'].'" created');
 
-    		// Prepare request (no fopen() usage because "allow_url_fopen=FALSE" may be set in PHP.INI)
-			$req = '/plugins/identy_switch/identy_switch_newmails.php?iid=0&cache='.urlencode($cfg['cache']);
+    		// prepare request (no fopen() usage because "allow_url_fopen=FALSE" may be set in PHP.INI)
+			$req = '/plugins/identity_switch/identity_switch_newmails.php?iid=0&cache='.urlencode($cfg['cache']);
 			if (!$cfg['fp']->write($req))
 			{
 				fclose($cfg['fp']);
@@ -569,7 +519,7 @@ class identy_switch extends identy_switch_prefs
 			self::write_log('Starting request "'.$req.'"', true);
 		}
 
-		// Check for data file
+		// check for data file
 		$n = 0;
 		while (!file_exists($cfg['data']))
 		{
@@ -581,12 +531,12 @@ class identy_switch extends identy_switch_prefs
 			sleep (1);
 		}
 
-		// Load data file
+		// load data file
 		self::write_log('Loading and deleting data file', true);
 		$wrk = file_get_contents($cfg['data']);
 		@unlink($cfg['data']);
 
-		// Process data lines
+		// process data lines
 		if (is_string($wrk))
 		{
 			foreach (explode('###', $wrk) as $line)
@@ -639,7 +589,7 @@ class identy_switch extends identy_switch_prefs
 
 		$this->add_texts('localization');
 
-		//  Control array
+		//  control array
 		$ctl    = [];
 		$ctl[0] = [
 					'autoplay'		=> rawurlencode($this->gettext('notify.err.autoplay')),
@@ -652,15 +602,15 @@ class identy_switch extends identy_switch_prefs
 		$basic = false;
 		foreach (self::get() as $iid => $rec)
 		{
-			// Skip unwanted entries
+			// skip unwanted entries
 			if (!is_numeric($iid))
 				continue;
 
-			// Set unseen to provide to browser
+			// set unseen to provide to browser
 			$ctl[$cnt]['iid'] 	 = $iid;
 			$ctl[$cnt]['unseen'] = $rec['unseen'];
 
-			// Should we notify?
+			// should we notify?
 			if ($rec['notify'])
 			{
 				self::set($iid, 'notify', false);
@@ -687,7 +637,7 @@ class identy_switch extends identy_switch_prefs
 			$cnt++;
 		}
 
-		$rc->output->command('plugin.identy_switch_notify', $ctl);
+		$rc->output->command('plugin.identity_switch_notify', $ctl);
 	}
 
 }

@@ -1,6 +1,12 @@
+--
+-- 	Identity switch RoundCube Bundle
+--
+--	@copyright	(c) 2024 Forian Daeumling, Germany. All right reserved
+-- 	@license 	https://github.com/toteph42/identity_switch/blob/master/LICENSE
+--
 --  Created with phpmyadmin
 
-CREATE TABLE IF NOT EXISTS `identy_switch`(
+CREATE TABLE IF NOT EXISTS `identity_switch`(
     `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
     `user_id` INT(10) UNSIGNED NOT NULL,
     `iid` INT(10) UNSIGNED NOT NULL,
@@ -20,9 +26,9 @@ CREATE TABLE IF NOT EXISTS `identy_switch`(
     `junk` VARCHAR(64) DEFAULT '',
     `trash` VARCHAR(64) DEFAULT '',
     UNIQUE KEY `user_id_label`(`user_id`, `label`),
-    CONSTRAINT `fk_identy_user_id` FOREIGN KEY(`user_id`) REFERENCES `users`(`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT `fk_identy_identity_id` FOREIGN KEY(`iid`) REFERENCES `identities`(`identity_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT `fk_identity_user_id` FOREIGN KEY(`user_id`) REFERENCES `users`(`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT `fk_identity_identity_id` FOREIGN KEY(`iid`) REFERENCES `identities`(`identity_id`) ON DELETE CASCADE ON UPDATE CASCADE,
     PRIMARY KEY(`id`),
-    INDEX `IX_identy_switch_user_id`(`user_id`),
-    INDEX `IX_identy_switch_iid`(`iid`)
+    INDEX `IX_identity_switch_user_id`(`user_id`),
+    INDEX `IX_identity_switch_iid`(`iid`)
 );

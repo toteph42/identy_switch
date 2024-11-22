@@ -4,9 +4,8 @@
 --	@copyright	(c) 2024 Forian Daeumling, Germany. All right reserved
 -- 	@license 	https://github.com/toteph42/identity_switch/blob/master/LICENSE
 --
---  Created with phpmyadmin
+-- Created with: https://sqliteonline.com/
 
 ALTER TABLE
-	`identity_switch`
-CHANGE `imap_pwd` `imap_pwd` VARCHAR(128);
+	`identy_switch` RENAME TO `identity_switch`;
 	

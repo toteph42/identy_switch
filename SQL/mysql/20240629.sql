@@ -1,10 +1,16 @@
+--
+-- 	Identity switch RoundCube Bundle
+--
+--	@copyright	(c) 2024 Forian Daeumling, Germany. All right reserved
+-- 	@license 	https://github.com/toteph42/identity_switch/blob/master/LICENSE
+--
 --  Created with phpmyadmin
 
 ALTER TABLE
-	`identy_switch`
+	`identity_switch`
 ADD COLUMN `folders` MEDIUMTEXT DEFAULT '';
 UPDATE 
-	`identy_switch`
+	`identity_switch`
 SET `folders` = JSON_OBJECT(
     	'drafts', `drafts`,
     	'sent', `sent`,
@@ -12,13 +18,13 @@ SET `folders` = JSON_OBJECT(
     	'trash', `trash`
     	);    	    	
 ALTER TABLE
-	`identy_switch`
+	`identity_switch`
 DROP `drafts`,
 DROP `sent`,
 DROP `junk`,
 DROP `trash`;
 UPDATE
-	`identy_switch`
+	`identity_switch`
 -- SAME_AS_IMAP	
 SET `flags`= CASE WHEN `flags` & 0x0010  
 THEN 

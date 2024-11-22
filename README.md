@@ -1,8 +1,8 @@
-# Identy switch plugin for Roundcube
+# identity switch plugin for Roundcube
 
-![](https://img.shields.io/packagist/v/toteph42/identy_switch.svg)
-![](https://img.shields.io/packagist/l/toteph42/identy_switch.svg)
-![](https://img.shields.io/packagist/dt/toteph42/identy_switch.svg)
+![](https://img.shields.io/packagist/v/toteph42/identity_switch.svg)
+![](https://img.shields.io/packagist/l/toteph42/identity_switch.svg)
+![](https://img.shields.io/packagist/dt/toteph42/identity_switch.svg)
 
 This plugin is based on the [ident_switch](https://github.com/dougluce/ident_switch "ident_switch") plugin. It is completly rewritten and additional features have been added.
 
@@ -82,7 +82,7 @@ Please don't forget to set `Special Folders` in `Settings` -> `Preferences`. All
 
 ### Migration from ident_switch plugin ###
 
-If you've installed the `ident_switch` plugin, there is a migration file available in `SQL` subdirectory which copies the content of the old table to the new table and deletes the `ident_switch` table. To make this happen, you should first install this plugin (during installation a table `identy_switch` will automatically be created) and then you should appy `SQL/migrate.sql`. 
+If you've installed the `ident_switch` plugin, there is a migration file available in `SQL` subdirectory which copies the content of the old table to the new table and deletes the `ident_switch` table. To make this happen, you should first install this plugin (during installation a table `identity_switch` will automatically be created) and then you should appy `SQL/migrate.sql`. 
 
 ### Version compatibility ###
 

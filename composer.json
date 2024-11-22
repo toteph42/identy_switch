@@ -1,11 +1,11 @@
 {
-	"name" : "toteph42/identy_switch",
+	"name" : "toteph42/identity_switch",
 	"type" : "roundcube-plugin",
 	"description" : "This plugin allows users to switch between different accounts (and check for new mails) in a single Roundcube session.",
-	"homepage" : "https://github.com/totep42/identy_switch",
+	"homepage" : "https://github.com/totep42/identity_switch",
 	"keywords" : [
 		"identity",
-		"select identy",
+		"select identity",
 		"imap",
 		"smtp",
 		"mail",
@@ -35,7 +35,7 @@
 		"dougluce/ident_switch" : "*"
 	},
 	"support" : {
-		"issues" : "https://github.com/totep42/identy_switch/issues"
+		"issues" : "https://github.com/totep42/identity_switch/issues"
 	},
 	"extra" : {
 		"roundcube" : {

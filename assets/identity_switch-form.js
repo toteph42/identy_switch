@@ -1,8 +1,8 @@
 /*
- * 	Identy switch RoundCube Bundle
+ * 	Identity switch RoundCube Bundle
  *
  *	@copyright	(c) 2024 Forian Daeumling, Germany. All right reserved
- * 	@license 	LGPL-3.0-or-later
+ * 	@license 	https://github.com/toteph42/identity_switch/blob/master/LICENSE
  */
 
 $(function() {
@@ -19,10 +19,10 @@ $(function() {
     if (fld.prop('value') == 0)
     	fld.prop('checked', false);
     	
-	identy_switch_enabled(); 
+	identity_switch_enabled(); 
 });
 
-function identy_switch_enabled() {
+function identity_switch_enabled() {
 	
 	var fld = $('input[name="_enabled"]');
 	

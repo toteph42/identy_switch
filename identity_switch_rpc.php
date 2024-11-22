@@ -2,13 +2,13 @@
 declare(strict_types=1);
 
 /*
- * 	Identy switch RoundCube Bundle
+ * 	Identity switch RoundCube Bundle
  *
  *	@copyright	(c) 2024 Forian Daeumling, Germany. All right reserved
- * 	@license 	LGPL-3.0-or-later
+ * 	@license 	https://github.com/toteph42/identity_switch/blob/master/LICENSE
  */
 
-class identy_switch_rpc  {
+class identity_switch_rpc  {
 
 	private $host	= null;
     private $req	= null;
@@ -32,14 +32,14 @@ class identy_switch_rpc  {
 					 	  ],
 		]);
 
-		// Open async connection
+		// open async connection
 		if (!($this->fp = stream_socket_client($host, $errno, $errmsg, 30,STREAM_CLIENT_ASYNC_CONNECT, $ctx)))
 			return 'Cannot connect to "'.$host.'" - ['.$errno.'] '.$errmsg;
 
-		// Set timeout
+		// set timeout
 		stream_set_timeout($this->fp, 30);
 
-		// Save host name
+		// save host name
 		if ($p = strpos($host, '://'))
 			$host = substr($host, 3 + $p);
 		if ($p = strpos($host, ':'))
@@ -60,7 +60,7 @@ class identy_switch_rpc  {
 
 		$this->req = $req;
 
-		// Finalize request
+		// finalize request
 		$req = 'GET '.$req." HTTP/1.0\r\nHost: ".$this->host."\r\n\r\n";
 
 	    return (bool)fwrite($this->fp, $req);

@@ -1,10 +1,16 @@
+--
+-- 	Identity switch RoundCube Bundle
+--
+--	@copyright	(c) 2024 Forian Daeumling, Germany. All right reserved
+-- 	@license 	https://github.com/toteph42/identity_switch/blob/master/LICENSE
+--
 -- Created with: https://sqliteonline.com/
 
 ALTER TABLE
-	identy_switch
+	identity_switch
 ADD COLUMN folders VARCHAR(65534) DEFAULT '';
 UPDATE 
-	identy_switch
+	identity_switch
 SET folders = JSON_BUILD_OBJECT (
     	'drafts', drafts,
     	'sent', sent,
@@ -12,19 +18,19 @@ SET folders = JSON_BUILD_OBJECT (
     	'trash', trash
     	);    	    	
 ALTER TABLE
-	identy_switch
+	identity_switch
 DROP drafts;
 ALTER TABLE
-	identy_switch
+	identity_switch
 DROP sent;
 ALTER TABLE
-	identy_switch
+	identity_switch
 DROP junk;
 ALTER TABLE
-	identy_switch
+	identity_switch
 DROP trash;
 UPDATE
-	identy_switch
+	identity_switch
 -- SAME_AS_IMAP	
 SET flags = CASE WHEN CAST(flags & x'0010'::INT AS BOOLEAN)
 THEN 
