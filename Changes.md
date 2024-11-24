@@ -1,5 +1,10 @@
 # Changelog identity switch plugin
 
+## Release 1.1.1
+
+- Added: Possibility to create/edit default identity label for drop down menu
+- Fixed: Saving notification mode for default identity 
+
 ## Release 1.1.0
 
 - Changed: README.MD

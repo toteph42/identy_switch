@@ -30,6 +30,7 @@ class identity_switch_prefs extends rcube_plugin
 	const SHOW_REAL_FOLDER		= 0x1000;			// show real folder names
 	const LOCK_SPECIAL_FOLDER	= 0x2000;			// lock special folders
 	const UNSEEN				= 0x4000;			// unssen check performed
+	const DEFAULT				= 0x8000;			// default identity
 
 	/* 	20240629.sql
 
@@ -49,31 +50,32 @@ class identity_switch_prefs extends rcube_plugin
 	function init(): void
 	{
 		// preference hooks and actions
-		$this->add_hook('identity_form', 				  [ $this, 'identity_switch_form' ]);
-		$this->add_hook('identity_update', 				  [ $this, 'identity_switch_update' ]);
-		$this->add_hook('identity_create_after',		  [ $this, 'identity_switch_update' ]);
-		$this->add_hook('identity_delete', 				  [ $this, 'identity_switch_delete' ]);
-		$this->add_hook('preferences_list', 			  [ $this, 'prefs_list' ]);
-		$this->add_hook('preferences_save', 			  [ $this, 'prefs_save' ]);
-		$this->add_hook('identity_update', 			  	  [ $this, 'prefs_upd' ]);
+		$this->add_hook('identity_form', 				  [ $this, 'show_identity_switch_prefs' ]);
+		$this->add_hook('identity_update', 				  [ $this, 'update_identity_switch_prefs' ]);
+		$this->add_hook('identity_create_after',		  [ $this, 'update_identity_switch_prefs' ]);
+		$this->add_hook('identity_delete', 				  [ $this, 'delete_identity_switch_prefs' ]);
+		$this->add_hook('preferences_list', 			  [ $this, 'show_default_identity_prefs' ]);
+		$this->add_hook('preferences_save', 			  [ $this, 'save_default_identity_prefs' ]);
+		$this->add_hook('identity_update', 			  	  [ $this, 'upd_default_identity_prefs' ]);
 
 		// get default identity
 		if (!$this->default)
 		{
 			$rc 		   = rcmail::get_instance();
 			$this->default = $rc->user->get_identity();
-			$this->default = $this->default ['identity_id'];
+			$this->default = $this->default['identity_id'];
 		}
 	}
 
 	/**
-	 * 	Preference list in settings
+	 * 	Show preference list in settings for default identoty
 	 *
 	 * 	@param 	array $args
 	 * 	@return array
 	 */
-	function prefs_list(array $args): array
+	function show_default_identity_prefs(array $args): array
 	{
+		// handle onlysome preferences
 		if ($args['section'] != 'folders' && $args['section'] != 'mailbox' && $args['section'] != 'general')
 		    return $args;
 
@@ -81,68 +83,83 @@ class identity_switch_prefs extends rcube_plugin
 
 		// common settings
 		if ($args['section'] == 'general')
-			return self::get_general_form($args);
+			return self::show_general_prefs($args);
 
 		// special folder settings
 		if ($args['section'] == 'folders')
-			return self::get_special_folders($args);
+			return self::show_special_folders_prefs($args);
 
 		// mailbox settings
 		if ($args['section'] == 'mailbox')
-			return self::get_notify_form($args);
+			return self::show_notification_prefs($args);
 
 		return $args;
 	}
 
 	/**
-	 * 	Save preferences in settings
+	 * 	Show general preferences
 	 *
-	 * 	@param 	array $args
+	 * 	@param array $args
+	 * 	@param bool $flag
 	 * 	@return array
 	 */
-	function prefs_save(array $args): array
+	private function show_general_prefs(array $args, bool $int_call = false): array
 	{
-		if ($args['section'] != 'folders' && $args['section'] != 'mailbox' && $args['section'] != 'general')
+		if (!self::get('config', 'check'))
+		{
+			if (!$int_call)
+				unset($args['blocks']['main']['options']['refresh_interval']);
+			return $args;
+		}
+
+		$rc = rcmail::get_instance();
+
+		// check if configuration can be override
+		if (in_array('refresh_interval', (array) $rc->config->get('dont_override')))
 			return $args;
 
-		$this->add_texts('localization');
+		$cfg = $rc->config->all();
 
-		// common settings
-		if ($args['section'] == 'general')
-			return self::save_general_form($args);
+		$sel = new html_select([
+					'name'  => '_refresh_interval',
+                    'id'    => '_refresh_interval',
+                    'class' => 'custom-select'
+        ]);
 
-		// special folder settings
-		if ($args['section'] == 'folders')
-			return self::save_special_folders($args);
+		$sel->add($this->gettext('never'), 0);
+        foreach ([ 1, 3, 5, 10, 15, 30, 60 ] as $min)
+        {
+        	if (!$cfg['min_refresh_interval'] || $cfg['min_refresh_interval'] <= $min * 60)
+        	{
+				$lab = $rc->gettext([ 'name' => 'everynminutes', 'vars' => ['n' => $min ] ]);
+                $sel->add($lab, $min);
+			}
+		}
 
-		// mailbox settings
-		if ($args['section'] == 'mailbox')
-			return self::save_notify_form($args);
+		$rec = self::get(isset($args['record']['identity_id']) ? $args['record']['identity_id'] : self::USR);
+
+        if ($int_call)
+	        return [ 'refreshinterval' => [
+        									'type' => 'select',
+									  		'value' => $sel->show($rec['newmail_check'] / 60),
+										  ]
+        	];
+
+		$args['blocks']['main']['options']['refresh_interval'] = [
+                        'title'   => html::label('_refresh_interval', rcube::Q($this->gettext('refreshinterval'))),
+                        'content' => $sel->show($rec['newmail_check'] / 60),
+		];
 
 		return $args;
 	}
 
 	/**
-	 * 	Update identity preferences in settings for default identity
+	 * 	Show special folder preferences
 	 *
 	 * 	@param array $args
 	 * 	@return array
 	 */
-	function prefs_upd(array $args): array
-	{
-		if ($args['record']['standard'])
-			self::set($this->default, 'label', $args['record']['name']);
-
-		return $args;
-	}
-
-	/**
-	 * 	Get special folder preferences
-	 *
-	 * 	@param array $args
-	 * 	@return array
-	 */
-	function get_special_folders(array $args): array
+	private function show_special_folders_prefs(array $args): array
 	{
 		$no_override = array_flip((array)rcmail::get_instance()->config->get('dont_override'));
 
@@ -180,58 +197,13 @@ class identity_switch_prefs extends rcube_plugin
 	}
 
 	/**
-	 * 	Set special folder preferences
-	 *
-	 * 	@param array $args
-	 * 	@return array
-	 */
-	function save_special_folders(array $args): array
-	{
-	   	$iid = self::get('iid');
-		$rec = self::get($iid);
-
-		if ($args['prefs']['show_real_foldernames'])
-			self::set($iid, 'flags', $rec['flags'] |= self::SHOW_REAL_FOLDER);
-		else
-			self::set($iid, 'flags', $rec['flags'] &= ~self::SHOW_REAL_FOLDER);
-
-		if (isset($args['prefs']['lock_special_folders']) && $args['prefs']['lock_special_folders'] == '1')
-			self::set($iid, 'flags', $rec['flags'] |= self::LOCK_SPECIAL_FOLDER);
-		else
-			self::set($iid, 'flags', $rec['flags'] &= ~self::LOCK_SPECIAL_FOLDER);
-
-		$box = [];
-		foreach (rcube_storage::$folder_types as $mbox)
-			if ($args['prefs'][$mbox.'_mbox'])
-				$box[$mbox] = $args['prefs'][$mbox.'_mbox'];
-
-		self::set($iid, 'folders', $box);
-
-		if ($iid != $this->default)
-		{
-			$rc = rcmail::get_instance();
-
-			$sql = 'UPDATE '.$rc->db->table_name(self::TABLE).
-				   ' SET flags = ?, folders = ?'.
-				   ' WHERE iid = ?';
-			$rc->db->query( $sql, $rec['flags'], json_encode($box), $iid);
-
-			// abuse $plugin['abort'] to prevent RoundCube main from saving preferences
-			$args['abort'] 	= true;
-			$args['result'] = true;
-		}
-
-		return $args;
-	}
-
-	/**
-	 * 	Create notification preferences
+	 * 	Show notification preferences
 	 *
 	 * 	@param array $args
 	 * 	@param bool $flag
 	 * 	@return array
 	 */
-	function get_notify_form(array $args, bool $int_call = false): array
+	private function show_notification_prefs(array $args, bool $int_call = false): array
 	{
 		// checking disabled?
 		if (!self::get('config', 'check'))
@@ -241,7 +213,8 @@ class identity_switch_prefs extends rcube_plugin
 			return $args;
 		}
 
-		$rec = self::get(isset($args['record']['identity_id']) ? $args['record']['identity_id'] : self::USR);
+		// load identity data
+		$rec = self::get(isset($args['record']['identity_id']) ? $args['record']['identity_id'] : self::get('iid'));
 
         $rc = rcmail::get_instance();
 
@@ -293,10 +266,11 @@ class identity_switch_prefs extends rcube_plugin
 				   'desktop' => self::NOTIFY_DESKTOP,
 				   'sound' 	 => self::NOTIFY_SOUND ] as $type => $flag)
 		{
+			// setting disabled?
 			if (in_array('newmail_notifier_'.$type, $no_override))
 				continue;
 
-			$cb = new html_checkbox([ 			'name' 	=> '_notify_'.$type,
+			$cb = new html_checkbox([ 'name' => '_notify_'.$type,
 								  	  			'value' => '1' ]);
 
 			switch($type)
@@ -339,7 +313,114 @@ class identity_switch_prefs extends rcube_plugin
 			}
 		}
 
-		return $int_call ? $set + $this->get_general_form($args, true) : $args;
+		return $int_call ? $set + self::show_general_prefs($args, true) : $args;
+	}
+
+	/**
+	 * 	Save preferences in settings for default identity
+	 *
+	 * 	@param 	array $args
+	 * 	@return array
+	 */
+	function save_default_identity_prefs(array $args): array
+	{
+		if ($args['section'] != 'folders' && $args['section'] != 'mailbox' && $args['section'] != 'general')
+			return $args;
+
+		$this->add_texts('localization');
+
+		// common settings
+		if ($args['section'] == 'general')
+			return self::save_general_prefs($args);
+
+		// special folder settings
+		if ($args['section'] == 'folders')
+			return self::save_special_folders_prefs($args);
+
+		// mailbox settings
+		if ($args['section'] == 'mailbox')
+			return self::save_notification_prefs($args);
+
+		return $args;
+	}
+
+	/**
+	 * 	Save general preferences
+	 *
+	 * 	@param array $args
+	 * 	@return array
+	 */
+	private function save_general_prefs(array $args): array
+	{
+	   	$iid = self::get('iid');
+		$rec = self::get($iid);
+
+        if (!empty($val = rcube_utils::get_input_value('_refresh_interval', rcube_utils::INPUT_POST)))
+        {
+        	$args['prefs']['refresh_interval'] = $val * 60;
+        	self::set($iid, 'newmail_check', $rec['newmail_check'] = $val * 60);
+        }
+
+		if ($iid != $this->default)
+		{
+			$rc = rcmail::get_instance();
+
+			$sql = 'UPDATE '.$rc->db->table_name(self::TABLE).
+				   ' SET newmail_check = ? '.
+				   ' WHERE iid = ?';
+			$rc->db->query( $sql, $rec['newmail_check'], $iid);
+
+			// abuse $plugin['abort'] to prevent RC main from saving prefs
+			$args['abort'] 	= true;
+			$args['result'] = true;
+		}
+
+		return $args;
+	}
+
+	/**
+	 * 	Set special folder preferences
+	 *
+	 * 	@param array $args
+	 * 	@return array
+	 */
+	private function save_special_folders_prefs(array $args): array
+	{
+	   	$iid = self::get('iid');
+		$rec = self::get($iid);
+
+		if ($args['prefs']['show_real_foldernames'])
+			self::set($iid, 'flags', $rec['flags'] |= self::SHOW_REAL_FOLDER);
+		else
+			self::set($iid, 'flags', $rec['flags'] &= ~self::SHOW_REAL_FOLDER);
+
+		if (isset($args['prefs']['lock_special_folders']) && $args['prefs']['lock_special_folders'] == '1')
+			self::set($iid, 'flags', $rec['flags'] |= self::LOCK_SPECIAL_FOLDER);
+		else
+			self::set($iid, 'flags', $rec['flags'] &= ~self::LOCK_SPECIAL_FOLDER);
+
+		$box = [];
+		foreach (rcube_storage::$folder_types as $mbox)
+			if ($args['prefs'][$mbox.'_mbox'])
+				$box[$mbox] = $args['prefs'][$mbox.'_mbox'];
+
+		self::set($iid, 'folders', $box);
+
+		if ($iid != $this->default)
+		{
+			$rc = rcmail::get_instance();
+
+			$sql = 'UPDATE '.$rc->db->table_name(self::TABLE).
+				   ' SET flags = ?, folders = ?'.
+				   ' WHERE iid = ?';
+			$rc->db->query( $sql, $rec['flags'], json_encode($box), $iid);
+
+			// abuse $plugin['abort'] to prevent RoundCube main from saving preferences
+			$args['abort'] 	= true;
+			$args['result'] = true;
+		}
+
+		return $args;
 	}
 
 	/**
@@ -348,7 +429,7 @@ class identity_switch_prefs extends rcube_plugin
 	 * 	@param array $args
 	 * 	@return array
 	 */
-	function save_notify_form(array $args): array
+	private function save_notification_prefs(array $args): array
 	{
 	   	$iid = self::get('iid');
 		$rec = self::get($iid);
@@ -365,7 +446,7 @@ class identity_switch_prefs extends rcube_plugin
 
 		foreach ([ 	'basic' 	=> self::NOTIFY_BASIC,
 					'desktop'	=> self::NOTIFY_DESKTOP,
-					'sound'		=> self::NOTIFY_SOUND ] as $type => $flag) {
+					'sound'		=> self::NOTIFY_SOUND 		] as $type => $flag) {
             $key = 'newmail_notifier_' . $type;
             if (!empty($val = rcube_utils::get_input_value('_notify_'.$type, rcube_utils::INPUT_POST)))
             {
@@ -399,112 +480,57 @@ class identity_switch_prefs extends rcube_plugin
 	}
 
 	/**
-	 * 	Create general preferences
+	 * 	Update identity preferences
 	 *
 	 * 	@param array $args
-	 * 	@param bool $flag
 	 * 	@return array
 	 */
-	private function get_general_form(array $args, bool $int_call = false): array
+	function upd_default_identity_prefs(array $args): array
 	{
-		if (!self::get('config', 'check'))
+		// default identity?
+		if ($args['record']['standard'])
 		{
-			if (!$int_call)
-				unset($args['blocks']['main']['options']['refresh_interval']);
-			return $args;
-		}
+			// is label available?
+			if (!($label = (string)rcube_utils::get_input_value('_label', rcube_utils::INPUT_POST)))
+				$label = $args['record']['name'];
+			self::set($this->default, 'label', $label);
 
-		$rc = rcmail::get_instance();
-
-		// check if configuration can be override
-		if (in_array('refresh_interval', (array) $rc->config->get('dont_override')))
-			return $args;
-
-		$cfg = $rc->config->all();
-
-		$sel = new html_select([
-					'name'  => '_refresh_interval',
-                    'id'    => '_refresh_interval',
-                    'class' => 'custom-select'
-        ]);
-
-		$sel->add($this->gettext('never'), 0);
-        foreach ([ 1, 3, 5, 10, 15, 30, 60 ] as $min)
-        {
-        	if (!$cfg['min_refresh_interval'] || $cfg['min_refresh_interval'] <= $min * 60)
-        	{
-				$lab = $rc->gettext([ 'name' => 'everynminutes', 'vars' => ['n' => $min ] ]);
-                $sel->add($lab, $min);
+			$rc  = rcmail::get_instance();
+			$sql = 'SELECT label FROM '.$rc->db->table_name(self::TABLE).' WHERE iid = ?';
+			if ($rc->db->fetch_assoc($rc->db->query($sql, $this->default)))
+			{
+				$sql = 'UPDATE '.
+					   $rc->db->table_name(self::TABLE).
+				   	   ' SET label = ? WHERE iid = ?';
+				$rc->db->query($sql, $label, $this->default);
+			}
+			else
+			{
+				$sql = 'INSERT INTO '.
+					   $rc->db->table_name(self::TABLE).
+				   	   ' (user_id, iid, label) VALUES(?, ?, ?)';
+				$rc->db->query($sql, $rc->user->ID, $this->default, $label);
 			}
 		}
 
-		$rec = self::get(isset($args['record']['identity_id']) ? $args['record']['identity_id'] : self::USR);
-
-        if ($int_call)
-	        return [ 'refreshinterval' => [
-        									'type' => 'select',
-									  		'value' => $sel->show($rec['newmail_check'] / 60),
-										  ]
-        	];
-
-		$args['blocks']['main']['options']['refresh_interval'] = [
-                        'title'   => html::label('_refresh_interval', rcube::Q($this->gettext('refreshinterval'))),
-                        'content' => $sel->show($rec['newmail_check'] / 60),
-		];
-
 		return $args;
 	}
 
 	/**
-	 * 	Save general preferences
+	 * 	Show identity switch preferences
 	 *
 	 * 	@param array $args
 	 * 	@return array
 	 */
-	private function save_general_form(array $args): array
-	{
-	   	$iid = self::get('iid');
-		$rec = self::get($iid);
-
-        if (!empty($val = rcube_utils::get_input_value('_refresh_interval', rcube_utils::INPUT_POST)))
-        {
-        	$args['prefs']['refresh_interval'] = $val * 60;
-        	self::set($iid, 'newmail_check', $rec['newmail_check'] = $val * 60);
-        }
-
-		if ($iid != $this->default)
-		{
-			$rc = rcmail::get_instance();
-
-			$sql = 'UPDATE '.$rc->db->table_name(self::TABLE).
-				   ' SET newmail_check = ? '.
-				   ' WHERE iid = ?';
-			$rc->db->query( $sql, $rec['newmail_check'], $iid);
-
-			// abuse $plugin['abort'] to prevent RC main from saving prefs
-			$args['abort'] 	= true;
-			$args['result'] = true;
-		}
-
-		return $args;
-	}
-
-	/**
-	 * 	Create identity switch preferences
-	 *
-	 * 	@param array $args
-	 * 	@return array
-	 */
-	function identity_switch_form(array $args): array
+	function show_identity_switch_prefs(array $args): array
 	{
 		$email = isset($args['record']['email']) ? $args['record']['email'] : '';
 
-		// do not show options for default identity
-		if (isset($args['record']['identity_id']) && $args['record']['identity_id'] == $this->default)
-			return $args;
+		// is this default identity?
+		$default = isset($args['record']['identity_id']) && $args['record']['identity_id'] == $this->default;
 
 		// apply configuration from identity_switch/config.inc.php
-		if (is_array($cfg = $this->get_config($email)))
+		if (!$default && is_array($cfg = $this->get_config($email)))
 		{
 			if (isset($args['record']['identity_id']))
 			{
@@ -561,41 +587,46 @@ class identity_switch_prefs extends rcube_plugin
 		$args['form']['common'] = [
 			'name' 	  => isset($args['record']['identity_id']) ? $this->gettext('idsw.common.caption') :
 						 $this->gettext('idsw.common.noedit'),
-			'content' => $this->get_common_form($args),
+			'content' => $this->show_identity_switch_common_prefs($args),
 		];
 
-		$args['form']['imap'] = [
-			'name' 	  => $this->gettext('idsw.imap.caption'),
-			'content' => $this->get_imap_form($args),
-		];
-
-		$args['form']['smtp'] = [
-			'name' 	  => $this->gettext('idsw.smtp.caption'),
-			'content' => $this->get_smtp_form($args),
-		];
-
-		if (self::get('config', 'check'))
-			$args['form']['notify'] = [
-				'name' 	  => $this->gettext('idsw.notify.caption'),
-				'content' => $this->get_notify_form($args, true),
+		if (!$default)
+		{
+			$args['form']['imap'] = [
+				'name' 	  => $this->gettext('idsw.imap.caption'),
+				'content' => $this->show_identity_switch_imap_prefs($args),
 			];
+
+			$args['form']['smtp'] = [
+				'name' 	  => $this->gettext('idsw.smtp.caption'),
+				'content' => $this->show_identity_switch_smtp_prefs($args),
+			];
+
+			if (self::get('config', 'check'))
+				$args['form']['notify'] = [
+					'name' 	  => $this->gettext('idsw.notify.caption'),
+					'content' => $this->show_notification_prefs($args, true),
+				];
+		}
 
 		return $args;
 	}
 
 	/**
-	 * 	Get common preferences
+	 * 	Show common identity switch preferences
 	 *
 	 * 	@param array $args
 	 * 	@return array
 	 */
-	private function get_common_form(array &$args): array
+	private function show_identity_switch_common_prefs(array &$args): array
 	{
 		// edit existing identity record?
 		if (isset($args['record']['identity_id']))
 		{
 	        $rec = self::get($args['record']['identity_id']);
 	        $ro  = '';
+			// is this default identity?
+			$default = $args['record']['identity_id'] == $this->default;
 		} else
 		{
 			$rec = self::get(self::USR);
@@ -603,27 +634,29 @@ class identity_switch_prefs extends rcube_plugin
 		}
         $args['record']['label'] = $rec['label'];
 
+		$fields = [ 'label' => [ 'label' => $this->gettext('idsw.common.label'),
+								 'type'  => 'text', 'maxlength' => 32 ], ];
+
+ 		if ($default)
+			return $fields;
+
         $ise = $rec['flags'] & self::ENABLED ? '1' : '0';
 		$ena = new html_checkbox([  'name' 		=> '_enabled',
 								    'onchange'  => 'identity_switch_enabled();',
 								  	'value' 	=> $ise,
 									'disabled'	=> $ro, ]);
 
-		return [
-			'enabled'		=> [ 'label' => $this->gettext('idsw.common.enabled'),
-								 'value' => $ena->show($ise), ],
-			'label' 		=> [ 'label' => $this->gettext('idsw.common.label'),
-								 'type'  => 'text', 'maxlength' => 32 ],
-		];
+		return [ 'enabled' => [ 'label' => $this->gettext('idsw.common.enabled'),
+							    'value' => $ena->show($ise), ], ] + $fields;
 	}
 
 	/**
-	 * 	Get IMAP preferences
+	 * 	Show IMAP identity switch preferences
 	 *
 	 * 	@param array $args
 	 * 	@return array
 	 */
-	private function get_imap_form(array &$args): array
+	private function show_identity_switch_imap_prefs(array &$args): array
 	{
         // creating new identity?
 		$rec = self::get(isset($args['record']['identity_id']) ? $args['record']['identity_id'] : self::USR);
@@ -658,12 +691,12 @@ class identity_switch_prefs extends rcube_plugin
 	}
 
 	/**
-	 * 	Get SMTP preferences
+	 * 	Show SMTP identity switch preferences
 	 *
 	 * 	@param array $args
 	 * 	@return array
 	 */
-	private function get_smtp_form(array &$args): array
+	private function show_identity_switch_smtp_prefs(array &$args): array
 	{
         // creating new identity?
 		$rec = self::get(isset($args['record']['identity_id']) ? $args['record']['identity_id'] : self::USR);
@@ -689,22 +722,24 @@ class identity_switch_prefs extends rcube_plugin
 	}
 
 	/**
-	 * 	Create/Update identity
+	 * 	Create / Update identity switch preferences
 	 *
 	 * 	@param array $args
 	 * 	@return array
 	 */
-	function identity_switch_update(array $args): array
+	function update_identity_switch_prefs(array $args): array
 	{
 		$rc = rcmail::get_instance();
 
  		if (!self::get_field_value('0', 'enabled', false))
 		{
-			$sql = 'UPDATE '.$rc->db->table_name(self::TABLE).' SET flags = flags & ? WHERE iid = ? AND user_id = ?';
+			$sql = 'UPDATE '.$rc->db->table_name(self::TABLE).
+				   ' SET flags = flags & ? WHERE iid = ? AND user_id = ?';
 			$rc->db->query($sql, ~self::ENABLED, $args['id'], $rc->user->ID);
 			return $args;
 		}
 
+		// check field values
 		$rec = $this->check_field_values();
 		if (isset($rec['err']))
 		{
@@ -727,7 +762,7 @@ class identity_switch_prefs extends rcube_plugin
 		$q = $rc->db->query($sql, $rec['iid'], $rc->user->ID);
 		$r = $rc->db->fetch_assoc($q);
 
-		// record already exists, will update it
+		// if record already exists, we will update it
 		if ($r)
 		{
 			// record enabled?
@@ -742,8 +777,8 @@ class identity_switch_prefs extends rcube_plugin
 				return $args;
 			}
 
-			$sql = 'UPDATE ' .
-				$rc->db->table_name(self::TABLE) .
+			$sql = 'UPDATE '.
+				$rc->db->table_name(self::TABLE).
 				' SET flags = ?, label = ?, imap_host = ?, imap_port = ?, imap_delim = ?,'.
 				' imap_user = ?, imap_pwd = ?, smtp_host = ?, smtp_port = ?, '.
 				' notify_timeout = ?, newmail_check = ?, user_id = ?, iid = ?' .
@@ -752,21 +787,20 @@ class identity_switch_prefs extends rcube_plugin
 		// no record exists, create new one
 		else if ($rec['flags'] & self::ENABLED)
 		{
-			$sql = 'INSERT INTO ' .
-				$rc->db->table_name(self::TABLE) .
+			$sql = 'INSERT INTO '.
+				$rc->db->table_name(self::TABLE).
 				'(flags, label, imap_host, imap_port, imap_delim, imap_user, imap_pwd,'.
 				' smtp_host, smtp_port, notify_timeout, newmail_check, user_id, iid)'.
 				' VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
 		}
 
+		// did we write anything?
 		if ($sql)
 		{
 			// do we need to update password?
 			if (isset($rec['imap_pwd']))
 				$rec['imap_pwd'] = $rc->encrypt($rec['imap_pwd']);
 
-			// to start debug database handling enable next statement:
-			// $rc->db->set_debug(true);
 			$rc->db->query(
 				$sql,
 				$rec['flags'],
@@ -799,12 +833,12 @@ class identity_switch_prefs extends rcube_plugin
 	}
 
 	/**
-	 * 	Delete identity
+	 * 	Delete identity switch prefereces
 	 *
 	 * 	@param array $args
 	 * 	@return array
 	 */
-	function identity_switch_delete(array $args): array
+	function delete_identity_switch_prefs(array $args): array
 	{
 		$rc = rcmail::get_instance();
 
@@ -815,7 +849,7 @@ class identity_switch_prefs extends rcube_plugin
 
 		self::del($args['id']);
 
-		// is default identity deleted - get first available indetity
+		// is default identity deleted - get first available idnetity
 		if ($args['id'] == self::get('iid'))
 			foreach (self::get() as $k => $rec)
 				if (is_numeric($k))
@@ -1077,7 +1111,6 @@ class identity_switch_prefs extends rcube_plugin
 		return $cfg[$dom];
 	}
 
-
 	/**
 	 * 	Set variable in cache
 	 *
@@ -1198,7 +1231,6 @@ class identity_switch_prefs extends rcube_plugin
 		else
 			unset($_SESSION[self::TABLE][$var]);
 	}
-
 
 	/**
 	 * 	Write log message

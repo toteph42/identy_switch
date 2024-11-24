@@ -178,7 +178,8 @@ class identity_switch extends identity_switch_prefs
 									 '- substituting with "localhost"');
 					$host = 'localhost';
 				}
-				// parse hoost name for special characters
+
+				// parse host name for special characters
 				$host = rcube_utils::parse_host($host);
 
 				if (substr($host, 3, 1) == ':')
@@ -243,12 +244,16 @@ class identity_switch extends identity_switch_prefs
 
 				while ($r = $rc->db->fetch_assoc($q))
 				{
-					if ($iid != $r['iid'])
-					{
-						// create default setting
+					// is it default identity?
+					if ($iid == $r['iid'])
+						self::set($iid, 'label', $r['label']);
+					else {
+						// load default settings
 						self::get($r['iid']);
+						// swap saved data
 						foreach ($r as $k => $v)
 						{
+							// skip some fields
 							if ($k == 'id' || $k == 'user_id' || $k == 'iid')
 								continue;
 							if ($k == 'folders')
