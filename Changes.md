@@ -1,5 +1,9 @@
 # Changelog identity switch plugin
 
+## Release 1.1.2
+
+- Fixed: Typo in catch_newmails()
+
 ## Release 1.1.1
 
 - Added: Possibility to create/edit default identity label for drop down menu

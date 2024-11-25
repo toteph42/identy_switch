@@ -429,7 +429,7 @@ class identity_switch extends identity_switch_prefs
         if (empty($args['diff']['new']))
             return $args;
 
-        $iid = self::get(null, 'iid');
+        $iid = self::get('iid');
         $n   = 0;
         foreach (explode(':', $args['diff']['new']) as $id)
         	if (strlen($id) > 1)
