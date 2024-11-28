@@ -68,7 +68,7 @@ class identity_switch_prefs extends rcube_plugin
 	}
 
 	/**
-	 * 	Show preference list in settings for default identoty
+	 * 	Show preference list in settings for default identity
 	 *
 	 * 	@param 	array $args
 	 * 	@return array

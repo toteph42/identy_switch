@@ -58,8 +58,6 @@ class identity_switch extends identity_switch_prefs
 	{
 		$rc = rcmail::get_instance();
 
-##
-## unset($_SESSION[self::TABLE]);
 		// identity switch hooks and actions
 		$this->add_hook('startup', 						  [ $this, 'on_startup' ]);
 		$this->add_hook('render_page', 					  [ $this, 'on_render_page' ]);
@@ -131,135 +129,139 @@ class identity_switch extends identity_switch_prefs
 
 			$this->add_texts('localization');
 
-			// first call?
-			if (!isset($_SESSION[identity_switch_prefs::TABLE]['iid']) || !$_SESSION[identity_switch_prefs::TABLE]['iid'])
+			// not the first call?
+			if (isset($_SESSION[identity_switch_prefs::TABLE]['iid']) && $_SESSION[identity_switch_prefs::TABLE]['iid'] > 0)
 			{
-				$iid = $rc->user->get_identity();
-				$iid = $iid['identity_id'];
+				if ($args['template'] == 'mail')
+					self::create_menu();
+				break;
+			}
 
-				// create defaults for default user
-				self::get($iid);
+			$iid = $rc->user->get_identity();
+			$iid = $iid['identity_id'];
 
-				// set default user number
-				self::set('iid', $iid);
+			// create defaults for default user
+			self::get($iid);
 
-				// collect data for default identity
-				$i = $rc->user->get_identity();
-				self::set($iid, 'label', $i['name']);
-				self::set($iid, 'flags', self::ENABLED);
+			// set default user number
+			self::set('iid', $iid);
 
-				// swap IMAP data
-				self::set($iid, 'imap_user', $_SESSION['username']);
-				self::set($iid, 'imap_pwd', $_SESSION['password']);
-				self::set($iid, 'imap_host', $_SESSION['storage_host']);
-				self::set($iid, 'imap_port', $_SESSION['storage_port']);
-				if ($_SESSION['storage_ssl'] == 'ssl')
-					self::set($iid, 'flags', self::get($iid, 'flags') | self::IMAP_SSL);
-				if ($_SESSION['storage_ssl'] == 'tls')
-					self::set($iid, 'flags', self::get($iid, 'flags') | self::IMAP_TLS);
-				self::set($iid, 'imap_delim', $_SESSION['imap_delimiter']);
+			// collect data for default identity
+			$i = $rc->user->get_identity();
+			self::set($iid, 'label', $i['name']);
+			self::set($iid, 'flags', self::ENABLED);
 
-				// Sswap SMTP data
-				$hosts = $rc->config->get('smtp_host');
-				if (!is_array ($hosts))
-					$hosts = [ $_SESSION['storage_host'] => $hosts ];
-				$host = null;
-				foreach ($hosts as $imap => $smtp)
+			// swap IMAP data
+			self::set($iid, 'imap_user', $_SESSION['username']);
+			self::set($iid, 'imap_pwd', $_SESSION['password']);
+			self::set($iid, 'imap_host', $_SESSION['storage_host']);
+			self::set($iid, 'imap_port', $_SESSION['storage_port']);
+			if ($_SESSION['storage_ssl'] == 'ssl')
+				self::set($iid, 'flags', self::get($iid, 'flags') | self::IMAP_SSL);
+			if ($_SESSION['storage_ssl'] == 'tls')
+				self::set($iid, 'flags', self::get($iid, 'flags') | self::IMAP_TLS);
+			self::set($iid, 'imap_delim', $_SESSION['imap_delimiter']);
+
+			// Sswap SMTP data
+			$hosts = $rc->config->get('smtp_host');
+			if (!is_array ($hosts))
+				$hosts = [ $_SESSION['storage_host'] => $hosts ];
+			$host = null;
+			foreach ($hosts as $imap => $smtp)
+			{
+				if (!strcmp($imap, $_SESSION['storage_host']))
 				{
-					if (!strcmp($imap, $_SESSION['storage_host']))
-					{
-						$host = $smtp;
-						break;
-					}
+					$host = $smtp;
+					break;
 				}
-				if (!$host)
+			}
+			if (!$host)
+			{
+				self::write_log('Cannot discover associated SMTP host to IMAP server "'.$_SESSION['storage_host'].'" '.
+								 '- substituting with "localhost"');
+				$host = 'localhost';
+			}
+
+			// parse host name for special characters
+			$host = rcube_utils::parse_host($host);
+
+			if (substr($host, 3, 1) == ':')
+			{
+				if (strtolower(substr($host, 0, 3)) == 'ssl')
 				{
-					self::write_log('Cannot discover associated SMTP host to IMAP server "'.$_SESSION['storage_host'].'" '.
-									 '- substituting with "localhost"');
-					$host = 'localhost';
+					self::set($iid, 'flags', self::get($iid, 'flags') | self::SMTP_SSL);
+					$host = substr($host, 6);
+					self::set($iid, 'smtp_port', 465);
 				}
-
-				// parse host name for special characters
-				$host = rcube_utils::parse_host($host);
-
-				if (substr($host, 3, 1) == ':')
+				elseif (strtolower(substr($host, 0, 3)) == 'tls')
 				{
-					if (strtolower(substr($host, 0, 3)) == 'ssl')
-					{
-						self::set($iid, 'flags', self::get($iid, 'flags') | self::SMTP_SSL);
-						$host = substr($host, 6);
-						self::set($iid, 'smtp_port', 465);
-					}
-					elseif (strtolower(substr($host, 0, 3)) == 'tls')
-					{
-						self::set($iid, 'flags', self::get($iid, 'flags') | self::SMTP_TLS);
-						$host = substr($host, 6);
-						self::set($iid, 'smtp_port', 587);
-					}
-					// Unknown protocoll
-					if (($p = strpos($host, ':')) !== false)
-					{
-						self::set($iid, 'smtp_port', substr($host, $p + 1));
-						$host = substr($host, 0, $p);
-					}
+					self::set($iid, 'flags', self::get($iid, 'flags') | self::SMTP_TLS);
+					$host = substr($host, 6);
+					self::set($iid, 'smtp_port', 587);
 				}
-				self::set($iid, 'smtp_host', $host);
-
-				$prefs = $rc->user->get_prefs();
-
-				// swap nofication data
-				$p = 'newmail_notifier_';
-				if (isset($prefs['check_all_folders']) && $prefs['check_all_folders'])
-					self::set($iid, 'flags', self::get($iid, 'flags') | self::CHECK_ALLFOLDER);
-				foreach ([ 'basic' 	 => self::NOTIFY_BASIC,
-						   'desktop' => self::NOTIFY_DESKTOP,
- 		        		   'sound' 	 => self::NOTIFY_SOUND] as $k => $v)
-		        {
-		            if (isset($prefs[$p.$k]) && $prefs[$p.$k] == 1)
-						self::set($iid, 'flags', self::get($iid, 'flags') | $v);
-	            }
-	            if (isset($prefs[$p.'_desktop_timeout']))
-		            self::set($iid, 'notify_timeout', $prefs[$p.'_desktop_timeout']);
-
-	            // swap new mail check interval
-				self::set($iid, 'newmail_check', isset($prefs['refresh_interval']) ? $prefs['refresh_interval'] :
-						  $rc->config->get('refresh_interval'));
-
-				// swap special folder names
-				$box = [];
-				foreach (rcube_storage::$folder_types as $mbox)
-					$box[$mbox] = isset($prefs[$mbox.'_mbox']) ? $prefs[$mbox.'_mbox'] : '';
-				self::set($iid, 'folders', $box);
-				if (isset($prefs['show_real_foldernames']) && $prefs['show_real_foldernames'] == 'true')
-					self::set($iid, 'flags', self::get($iid, 'flags') | self::SHOW_REAL_FOLDER);
-				self::set($iid, 'flags', self::get($iid, 'flags') | (isset($prefs['lock_special_folders']) &&
-				   $prefs['lock_special_folders'] == true ? self::LOCK_SPECIAL_FOLDER : 0));
-
-				// swap data of alternate accounts
-				$sql = 'SELECT isw.* '.
-					   'FROM '.$rc->db->table_name(self::TABLE).' isw '.
-					   'INNER JOIN '.$rc->db->table_name('identities').' ii ON isw.iid=ii.identity_id '.
-					   'WHERE isw.user_id = ?';
-				$q = $rc->db->query($sql, $rc->user->data['user_id']);
-
-				while ($r = $rc->db->fetch_assoc($q))
+				// Unknown protocoll
+				if (($p = strpos($host, ':')) !== false)
 				{
-					// is it default identity?
-					if ($iid == $r['iid'])
-						self::set($iid, 'label', $r['label']);
-					else {
-						// load default settings
-						self::get($r['iid']);
-						// swap saved data
-						foreach ($r as $k => $v)
-						{
-							// skip some fields
-							if ($k == 'id' || $k == 'user_id' || $k == 'iid')
-								continue;
-							if ($k == 'folders')
-								$v = is_null($v) ? [] : json_decode($v);
-							self::set($r['iid'], $k, $v);
-						}
+					self::set($iid, 'smtp_port', substr($host, $p + 1));
+					$host = substr($host, 0, $p);
+				}
+			}
+			self::set($iid, 'smtp_host', $host);
+
+			$prefs = $rc->user->get_prefs();
+
+			// swap nofication data
+			$p = 'newmail_notifier_';
+			if (isset($prefs['check_all_folders']) && $prefs['check_all_folders'])
+				self::set($iid, 'flags', self::get($iid, 'flags') | self::CHECK_ALLFOLDER);
+			foreach ([ 'basic' 	 => self::NOTIFY_BASIC,
+					   'desktop' => self::NOTIFY_DESKTOP,
+		        		   'sound' 	 => self::NOTIFY_SOUND] as $k => $v)
+	        {
+	            if (isset($prefs[$p.$k]) && $prefs[$p.$k] == 1)
+					self::set($iid, 'flags', self::get($iid, 'flags') | $v);
+            }
+            if (isset($prefs[$p.'_desktop_timeout']))
+	            self::set($iid, 'notify_timeout', $prefs[$p.'_desktop_timeout']);
+
+	        // swap new mail check interval
+			self::set($iid, 'newmail_check', isset($prefs['refresh_interval']) ? $prefs['refresh_interval'] :
+			$rc->config->get('refresh_interval'));
+
+			// swap special folder names
+			$box = [];
+			foreach (rcube_storage::$folder_types as $mbox)
+				$box[$mbox] = isset($prefs[$mbox.'_mbox']) ? $prefs[$mbox.'_mbox'] : '';
+			self::set($iid, 'folders', $box);
+			if (isset($prefs['show_real_foldernames']) && $prefs['show_real_foldernames'] == 'true')
+				self::set($iid, 'flags', self::get($iid, 'flags') | self::SHOW_REAL_FOLDER);
+			self::set($iid, 'flags', self::get($iid, 'flags') | (isset($prefs['lock_special_folders']) &&
+			   $prefs['lock_special_folders'] == true ? self::LOCK_SPECIAL_FOLDER : 0));
+
+			// swap data of alternate accounts
+			$sql = 'SELECT isw.* '.
+				   'FROM '.$rc->db->table_name(self::TABLE).' isw '.
+				   'INNER JOIN '.$rc->db->table_name('identities').' ii ON isw.iid=ii.identity_id '.
+				   'WHERE isw.user_id = ?';
+			$q = $rc->db->query($sql, $rc->user->data['user_id']);
+
+			while ($r = $rc->db->fetch_assoc($q))
+			{
+				// is it default identity?
+				if ($iid == $r['iid'])
+					self::set($iid, 'label', $r['label']);
+				else {
+					// load default settings
+					self::get($r['iid']);
+					// swap saved data
+					foreach ($r as $k => $v)
+					{
+						// skip some fields
+						if ($k == 'id' || $k == 'user_id' || $k == 'iid')
+							continue;
+						if ($k == 'folders')
+							$v = is_null($v) ? [] : json_decode($v);
+						self::set($r['iid'], $k, $v);
 					}
 				}
 			}
@@ -280,8 +282,6 @@ class identity_switch extends identity_switch_prefs
 	 */
 	protected function create_menu(): void
 	{
-		$rc = rcmail::get_instance();
-
 		// build identity table
 		$acc = [];
 		foreach (self::get() as $iid => $rec)
@@ -310,7 +310,8 @@ class identity_switch extends identity_switch_prefs
 					  	   	'<span id="identity_switch_opt_'.$rec['iid'].'" class="unseen">'.
 					  	   	($rec['unseen'] > 0 ? $rec['unseen'] : '').'</span></a></li>';
 				}
-			$rc->output->add_footer($div.'</ul></div></div>');
+
+			rcmail::get_instance()->output->add_footer($div.'</ul></div></div>');
 		}
 	}
 

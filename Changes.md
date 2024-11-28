@@ -1,5 +1,9 @@
 # Changelog identity switch plugin
 
+## Release 1.1.3
+
+- Changed: Updating newmail count on identity switch improved
+
 ## Release 1.1.2
 
 - Fixed: Typo in catch_newmails()
